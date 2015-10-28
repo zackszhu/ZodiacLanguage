@@ -1,1 +1,10 @@
 E:\OneDrive\Sjtu\SE\SE302_Compile\Compiler\Compiler\bin\Debug\Compiler.exe.config
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.exe.config
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.exe
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.pdb
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.dll
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.pdb
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.xml
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.exe
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.pdb

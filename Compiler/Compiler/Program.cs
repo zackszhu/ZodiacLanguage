@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 using Irony.Parsing;
 
 namespace Compiler {
-    class Program {
-        static void Main(string[] args) {
+    public class ZodiacGrammar : Grammar {
+        public ZodiacGrammar() {
+
+            #region Lexical
+            StringLiteral stringLiteral = TerminalFactory.CreatePythonString("stringLiteral");
+            #endregion
+
         }
+
     }
 }
