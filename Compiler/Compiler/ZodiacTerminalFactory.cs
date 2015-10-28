@@ -15,17 +15,21 @@ namespace Compiler
             return term;
         }
 
+        public static StringLiteral CreateZodiacChar(string name) {
+            StringLiteral term = new StringLiteral(name, "'", StringOptions.IsChar);
+            return term;
+        }
+
         public static StringLiteral CreateZodiacString(string name) {
             StringLiteral term = new StringLiteral(name);
             term.AddStartEnd("'", StringOptions.AllowsAllEscapes);// AllowLineBreak??
             term.AddStartEnd("\"", StringOptions.AllowsAllEscapes);// AllowLineBreak??
-
-            term.AddPrefix("u", StringOptions.AllowsAllEscapes);
-            term.AddPrefix("r", StringOptions.NoEscapes);
-            term.AddPrefix("ur", StringOptions.NoEscapes);
-
             return term;
         }
 
+        public static IdentifierTerminal CreateZodiacIdentifier(string name) {
+            IdentifierTerminal id = new IdentifierTerminal("Identifier", IdOptions.None); 
+            return id;
+        }
     }
 }
