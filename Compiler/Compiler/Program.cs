@@ -1,15 +1,18 @@
-﻿using System;
+﻿using Irony.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Irony.Parsing;
 
 namespace Compiler {
+
     public class ZodiacGrammar : Grammar {
+
         public ZodiacGrammar() {
 
             #region Lexical
+
             StringLiteral CharLiteral = ZodiacTerminalFactory.CreateZodiacChar("CharLiteral");
             StringLiteral StringLiteral = ZodiacTerminalFactory.CreateZodiacString("StringLiteral");
             NumberLiteral Number = ZodiacTerminalFactory.CreateZodiacNumber("Number");
@@ -30,7 +33,7 @@ namespace Compiler {
             KeyTerm Lpar = ToTerm("(");
             KeyTerm Rpar = ToTerm(")");
 
-            #endregion
+            #endregion Lexical
 
             #region NonTerminals
 
@@ -43,6 +46,20 @@ namespace Compiler {
             var indexed_variable = new NonTerminal("indexed_variable");
             var constructor_variable = new NonTerminal("constructor_variable");
             var converter_variable = new NonTerminal("converter_variable");
+
+            /* 5 Function declarations and definitions */
+            var function_declaration = new NonTerminal("function_declaration");
+            var function_identifier = new NonTerminal("function_identifier");
+            var function_option = new NonTerminal("function_option");
+            var function_definiition = new NonTerminal("function_definition");
+            var function_body = new NonTerminal("function_body");
+            var function_parameter_block = new NonTerminal("function_parameter_block");
+            var function_parameters = new NonTerminal("function_parameters");
+            var function_parameter = new NonTerminal("function_parameter");
+            var function_parameters_default = new NonTerminal("function_parameters_default");
+            var function_parameter_default = new NonTerminal("function_parameter_default");
+            var function_instruction_block = new NonTerminal("function_instruction_block");
+            var function_scope_body = new NonTerminal("function_scope_body");
 
             /* 6 operator */
             var operators = new NonTerminal("operator"); //operator
@@ -58,12 +75,11 @@ namespace Compiler {
             var bit_or_operator = new NonTerminal("bit_or_operator");
             var and_operator = new NonTerminal("and_operator");
             var or_operator = new NonTerminal("or_operator");
-
+            
     
 
             /* 7 Expressions */
             var expression = new NonTerminal("expression");
-
 
             /* 8 Statements */
             var statement = new NonTerminal("statement");
@@ -73,7 +89,8 @@ namespace Compiler {
             var break_statement = new NonTerminal("break_statement");
             var continue_statement = new NonTerminal("continue_statement");
             var ret_statement = new NonTerminal("ret_statement");
-            #endregion
+
+            #endregion NonTerminals
 
             /* Rule */
 
@@ -86,6 +103,19 @@ namespace Compiler {
             /* 4.2 Entire-Variables */
             entire_variable.Rule = identifier;
 
+            /* 5 Function declarations and definition */
+            function_declaration.Rule = function_option + "func" + function_identifier + semi;
+            function_identifier.Rule = identifier;
+            function_option.Rule = "static";
+            function_definiition.Rule = function_option + "func" + function_identifier + Lbr + function_body + Rbr;
+            function_body.Rule = function_parameter_block + function_instruction_block;
+            function_parameter_block.Rule = function_parameters + function_parameters_default;
+            function_parameters.Rule = MakeStarRule(function_parameters, function_parameter);
+            function_parameter.Rule = "param" + variable_default_definition + semi;
+            function_parameters_default.Rule = MakeStarRule(function_parameters_default, function_parameter_default);
+            function_parameter_default.Rule = "param" + variable_definition + semi;
+            function_instruction_block.Rule = MakePlusRule(function_instruction_block, function_scope_body);
+            function_scope_body.Rule = scope_body;
             /* 6 operator */
             operators.Rule = 
                 self_operator |
@@ -112,10 +142,9 @@ namespace Compiler {
             bit_or_operator.Rule = ToTerm("|");
             and_operator.Rule = ToTerm("&&");
             or_operator.Rule = ToTerm("||");
-            
+
             /* 7 Expressions */
 
-            
             /* 8 Statements */
             statement.Rule = 
                 simple_statement |
@@ -128,8 +157,6 @@ namespace Compiler {
             break_statement.Rule = "break" + semi;
             continue_statement.Rule = "continue" + semi;
             /* 8.5 Ret-statements */
-            
         }
-
     }
 }
