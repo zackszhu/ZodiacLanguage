@@ -58,7 +58,9 @@ namespace Compiler {
             var bit_or_operator = new NonTerminal("bit_or_operator");
             var and_operator = new NonTerminal("and_operator");
             var or_operator = new NonTerminal("or_operator");
-            
+
+    
+
             /* 7 Expressions */
             var expression = new NonTerminal("expression");
 
@@ -84,10 +86,36 @@ namespace Compiler {
             /* 4.2 Entire-Variables */
             entire_variable.Rule = identifier;
 
-
+            /* 6 operator */
+            operators.Rule = 
+                self_operator |
+                pow_operator |
+                multiply_operator |
+                add_operator |
+                shift_operator |
+                compare_operator |
+                equal_operator |
+                bit_and_operator |
+                bit_xor_operator |
+                bit_or_operator |
+                and_operator |
+                or_operator;
+            self_operator.Rule = ToTerm("!") | "~" | "+" | "-";
+            pow_operator.Rule = ToTerm("^^");
+            multiply_operator.Rule = ToTerm("*");
+            add_operator.Rule = ToTerm("+") | "-";
+            shift_operator.Rule = ToTerm("<<") | ">>";
+            compare_operator.Rule = ToTerm("<") | ">";
+            equal_operator.Rule = ToTerm("==");
+            bit_and_operator.Rule = ToTerm("&");
+            bit_xor_operator.Rule = ToTerm("^");
+            bit_or_operator.Rule = ToTerm("|");
+            and_operator.Rule = ToTerm("&&");
+            or_operator.Rule = ToTerm("||");
+            
             /* 7 Expressions */
 
-
+            
             /* 8 Statements */
             statement.Rule = 
                 simple_statement |

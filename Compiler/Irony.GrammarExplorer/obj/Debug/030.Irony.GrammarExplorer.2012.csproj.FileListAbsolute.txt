@@ -17,3 +17,6 @@ C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplo
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Irony.Interpreter.xml
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.GrammarExplorer.exe
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.GrammarExplorer.pdb
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Irony.GrammarExplorer.exe.config
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.GrammarExplorer.exe
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.GrammarExplorer.pdb
