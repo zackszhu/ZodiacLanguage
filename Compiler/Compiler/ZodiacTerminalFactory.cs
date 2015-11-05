@@ -28,7 +28,7 @@ namespace Compiler
         }
 
         public static IdentifierTerminal CreateZodiacIdentifier(string name) {
-            IdentifierTerminal id = new IdentifierTerminal("Identifier", IdOptions.None); 
+            IdentifierTerminal id = new IdentifierTerminal(name, IdOptions.None); 
             return id;
         }
     }
