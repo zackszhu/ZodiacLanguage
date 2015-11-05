@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Compiler {
 
-    [Language("Zodiac", "1.0", "course languages")]
+    [Language("Zodiac", "1.0", "Course Language")]
     public class ZodiacGrammar : Grammar {
 
         public ZodiacGrammar() {
@@ -97,9 +97,11 @@ namespace Compiler {
             var function_definition = new NonTerminal("function_definition");
             var function_body = new NonTerminal("function_body");
             var function_parameter_block = new NonTerminal("function_parameter_block");
-            var function_parameters = new NonTerminal("function_parameters");
+            var function_parameter_list_opt = new NonTerminal("function_parameter_list_opt");
+            var function_parameter_list = new NonTerminal("function_parameter_list");
             var function_parameter = new NonTerminal("function_parameter");
-            var function_parameters_default = new NonTerminal("function_parameters_default");
+            var function_parameter_default_list_opt = new NonTerminal("function_parameter_default_list_opt");
+            var function_parameter_default_list = new NonTerminal("function_parameter_default_list");
             var function_parameter_default = new NonTerminal("function_parameter_default");
             var function_instruction_block = new NonTerminal("function_instruction_block");
             var function_scope_body = new NonTerminal("function_scope_body");
@@ -167,7 +169,7 @@ namespace Compiler {
 
             #endregion NonTerminals
 
-            RegisterOperators(-1, "=");
+            RegisterOperators(-1, "=", ":=");
             RegisterOperators(1, "||");
             RegisterOperators(2, "&&");
             RegisterOperators(3, "|");
@@ -280,15 +282,17 @@ namespace Compiler {
             //converter_variable.Rule = converter;
             /* 5 Function declarations and definition */
             function_declaration.Rule = function_option + "func" + identifier + semi;
-            function_option.Rule = "static";
+            function_option.Rule = "static" | Empty;
             function_definition.Rule = function_option + "func" + identifier + Lbr + function_body + Rbr;
             function_body.Rule = function_parameter_block + function_instruction_block;
-            function_parameter_block.Rule = function_parameters + function_parameters_default;
-            function_parameters.Rule = MakeStarRule(function_parameters, function_parameter);
-            function_parameter.Rule = "param" + variable_default_definition + semi;
-            function_parameters_default.Rule = MakeStarRule(function_parameters_default, function_parameter_default);
-            function_parameter_default.Rule = "param" + variable_definition + semi;
-            function_instruction_block.Rule = MakePlusRule(function_instruction_block, function_scope_body);
+            function_parameter_block.Rule = function_parameter_list | function_parameter_default_list | (function_parameter_list + function_parameter_default_list) | Empty;
+            function_parameter_list_opt.Rule = function_parameter_list | Empty;
+            function_parameter_list.Rule = MakePlusRule(function_parameter_list, null, function_parameter);
+            function_parameter.Rule = "param" + identifier_list + assignment_operator + required_type + semi;
+            function_parameter_default_list_opt.Rule = function_parameter_default_list | Empty;
+            function_parameter_default_list.Rule = MakePlusRule(function_parameter_default_list, null, function_parameter_default);
+            function_parameter_default.Rule = "param" + identifier_list + assignment_operator + required_type + argument_list_par + semi;
+            function_instruction_block.Rule = function_scope_body | Empty;
             function_scope_body.Rule = scope_body;
 
             /* 6 operator */
@@ -300,7 +304,7 @@ namespace Compiler {
 
             bin_operator.Rule = ToTerm("^^") | "*" | "/" | "%" | "+" | "-" | "<<" | ">>" | "<" | ">" | "==" | "&"
                 | "^" | "|" | "&&" | "||";
-            assignment_operator.Rule = ToTerm("=");
+            assignment_operator.Rule = ToTerm("=") | ToTerm(":=");
             /* 7 Expressions */
             expression.Rule = primary_expression | bin_op_expression;
             parenthesized_expression.Rule = Lpar + expression + Rpar;
@@ -322,7 +326,7 @@ namespace Compiler {
                 loop_statement |
                 ret_statement;
             /* 8.2 Simple-statements */
-            simple_statement.Rule = assignment_statement | variable_definition_statement;
+            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition | function_declaration;
             variable_definition_statement.Rule = variable_definition + semi;
             assignment_statement.Rule = member_access + assignment_operator + expression;
             /* 8.3 Structed-statements */
@@ -365,15 +369,3 @@ namespace Compiler {
         
     }
 }
-//namespace c
-//{
-//    public class d
-//    {
-//        public d()
-//        {
-//            c.d(da, ds) = 1;
-//            sad();
-//            happy() a = new happy();
-//        }
-//    }
-//}
