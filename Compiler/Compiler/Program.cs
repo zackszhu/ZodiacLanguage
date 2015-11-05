@@ -18,7 +18,7 @@ namespace Compiler {
             StringLiteral stringLiteral = ZodiacTerminalFactory.CreateZodiacString("stringLiteral");
             NumberLiteral number = ZodiacTerminalFactory.CreateZodiacNumber("number");
             IdentifierTerminal identifier = ZodiacTerminalFactory.CreateZodiacIdentifier("identifier");
-
+           
             CommentTerminal singleLineComment = new CommentTerminal("singleLineComment", "@@", "\r", "\n");
             CommentTerminal mutiLineComment = new CommentTerminal("mutiLineComment", "@{", "}@");
             NonGrammarTerminals.Add(singleLineComment);
@@ -227,8 +227,10 @@ namespace Compiler {
             func_type.Rule = ToTerm("func");
             /* 2.1 Type-declarations */
             type_declaration.Rule = ToTerm("type") + identifier + semi;
+
+
             /* 2.2 Type-definitions */
-            type_definition.Rule = identifier + Lbr + structed_type + Rbr;//TODO
+            type_definition.Rule = ToTerm("type") + identifier + Lbr + structed_type + Rbr;//TODO
             type_identifier_list.Rule = MakePlusRule(type_identifier_list, comma, identifier);
             structed_type.Rule = MakeStarRule(structed_type, null, type_member);
             type_member.Rule = member_variable | member_function;
@@ -343,12 +345,12 @@ namespace Compiler {
 
             /* 9 Scope */
             scope.Rule = Lbr + scope_body_opt + Rbr;
-            scope_body_opt.Rule = scope_body | Empty;
+            scope_body_opt.Rule = scope_body | Empty | declaration;
             /* 9.2 Scope-bodys */
             //scope_body.Rule = declaration | definition | statement | comment;
             scope_body.Rule = statement_list;
             statement_list.Rule = MakePlusRule(statement_list, null, statement);
-            declaration.Rule = function_declaration | type_declaration;
+            declaration.Rule = function_declaration | type_declaration | Empty;
             definition.Rule = function_definition | type_definition;
 
 

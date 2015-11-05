@@ -11,3 +11,12 @@ C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Co
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.dll
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.dll.CodeAnalysisLog.xml
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.dll.lastcodeanalysissucceeded
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.dll
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.pdb
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.dll
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.pdb
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.dll.CodeAnalysisLog.xml
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.dll.lastcodeanalysissucceeded
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.dll
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.pdb
+E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.xml
