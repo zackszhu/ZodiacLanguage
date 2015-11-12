@@ -37,5 +37,9 @@ C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.pdb
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.xml
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
-C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.dll
-C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.pdb
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.pdb
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.CodeAnalysisLog.xml
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.lastcodeanalysissucceeded
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Zodiac.dll
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Zodiac.pdb
