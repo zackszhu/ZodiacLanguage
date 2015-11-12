@@ -11,7 +11,6 @@ namespace Compiler {
     public class ZodiacGrammar : Grammar {
 
         public ZodiacGrammar() {
-
             #region Lexical
 
             StringLiteral charLiteral = ZodiacTerminalFactory.CreateZodiacChar("charLiteral");
@@ -190,6 +189,7 @@ namespace Compiler {
 
             var identifier_ext = new NonTerminal("identifier_ext");
             var identifier_list = new NonTerminal("identifier_list");
+            var member_access_list = new NonTerminal("member_access_list");
             var member_access = new NonTerminal("member_access");
             var member_access_segments_opt = new NonTerminal("member_access_segments_opt");
             var member_access_segment = new NonTerminal("member_access");
@@ -205,6 +205,7 @@ namespace Compiler {
             identifier_ext.Rule = identifier | required_type;
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
+            member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
             member_access.Rule = identifier_ext + member_access_segments_opt;
             member_access_segments_opt.Rule = MakeStarRule(member_access_segments_opt, null, member_access_segment);
             member_access_segment.Rule = dot + identifier
@@ -313,6 +314,7 @@ namespace Compiler {
             assignment_operator.Rule = assignment_value_operator | assignment_reference_operator;
 
             /* 7 Expressions */
+
             expression.Rule = primary_expression | bin_op_expression;
             parenthesized_expression.Rule = Lpar + expression + Rpar;
             bin_op_expression.Rule = expression + bin_operator + expression;
@@ -336,7 +338,7 @@ namespace Compiler {
             simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition | function_declaration | type_definition;
 
             variable_definition_statement.Rule = variable_definition + semi;
-            assignment_statement.Rule = member_access + assignment_operator + expression;
+            assignment_statement.Rule = member_access_list + assignment_operator + expression_list + semi;
             /* 8.3 Structed-statements */
             structed_statement.Rule = if_statement | while_statement | for_statement;
             if_statement.Rule = ToTerm("if") + Lpar + expression + Rpar + scope + else_part_opt;
@@ -364,8 +366,8 @@ namespace Compiler {
             definition.Rule = function_definition | type_definition;
 
             /* 11 Program */
-            program.Rule = /*program_heading +*/ scope_body;//hide heading
-            program_heading.Rule = have_sequence_list;
+            program.Rule = program_heading + scope_body;//hide heading
+            program_heading.Rule = have_sequence_list | Empty;
             have_sequence_list.Rule = MakePlusRule(have_sequence_list, comma, have_sequence);
             have_sequence.Rule = ToTerm("have") + identifier + ".d";
 
