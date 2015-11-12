@@ -1,5 +1,4 @@
 E:\OneDrive\Sjtu\SE\SE302_Compile\Compiler\Compiler\bin\Debug\Compiler.exe.config
-C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.exe.config
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.pdb
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.dll
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.pdb
@@ -30,3 +29,13 @@ E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.pdb
 E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.xml
 E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.dll
 E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.pdb
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.dll
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.pdb
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.dll.CodeAnalysisLog.xml
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Compiler.dll.lastcodeanalysissucceeded
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.dll
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.pdb
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\bin\Debug\Irony.xml
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.dll
+C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.pdb
