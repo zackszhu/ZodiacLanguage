@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{421E8DA8-F4AB-4939-8371-BAE76E69DC3E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "030.Irony.GrammarExplorer.2012", "Irony.GrammarExplorer\030.Irony.GrammarExplorer.2012.csproj", "{AE1C04A8-B03D-4144-98E9-BF66C50265E7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{421E8DA8-F4AB-4939-8371-BAE76E69DC3E} = {421E8DA8-F4AB-4939-8371-BAE76E69DC3E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -366,7 +366,7 @@ namespace Compiler {
             definition.Rule = function_definition | type_definition;
 
             /* 11 Program */
-            program.Rule = program_heading + scope_body;//hide heading
+            program.Rule = program_heading + scope_body;
             program_heading.Rule = have_sequence_list | Empty;
             have_sequence_list.Rule = MakePlusRule(have_sequence_list, comma, have_sequence);
             have_sequence.Rule = ToTerm("have") + identifier + ".d";
