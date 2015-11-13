@@ -21,9 +21,9 @@ namespace Compiler
         }
 
         public static StringLiteral CreateZodiacString(string name) {
-            StringLiteral term = new StringLiteral(name);
-            term.AddStartEnd("'", StringOptions.AllowsAllEscapes);// AllowLineBreak??
-            term.AddStartEnd("\"", StringOptions.AllowsAllEscapes);// AllowLineBreak??
+            StringLiteral term = new StringLiteral(name,"\"");
+            //term.AddStartEnd("'", StringOptions.AllowsAllEscapes);// AllowLineBreak??
+           // term.AddStartEnd("\"", StringOptions.AllowsAllEscapes);// AllowLineBreak??
             return term;
         }
 

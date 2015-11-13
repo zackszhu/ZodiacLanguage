@@ -45,6 +45,5 @@ E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dl
 E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.pdb
 E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.CodeAnalysisLog.xml
 E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.lastcodeanalysissucceeded
-E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
 E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Zodiac.dll
 E:\Code\CSharp\compile\Zodiac\Compiler\Compiler\obj\Debug\Zodiac.pdb

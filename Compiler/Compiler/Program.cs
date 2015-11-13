@@ -132,6 +132,11 @@ namespace Compiler {
             var bin_op_expression = new NonTerminal("bin_op_expression");
             var unary_expression = new NonTerminal("unary_expression");
             var primary_expression = new NonTerminal("primary_expression");
+            var list_expression = new NonTerminal("list_expression");
+            var list_normal_expression = new NonTerminal("list_normal_expression");
+            var list_select_expression = new NonTerminal("list_select_expression");
+            var list_string_expression = new NonTerminal("list_string_expression");
+            
             var term = new NonTerminal("term");//TODO
             var literal = new NonTerminal("literal");
             var expression_list = new NonTerminal("expression_list");
@@ -141,7 +146,7 @@ namespace Compiler {
             var simple_statement = new NonTerminal("simple_statement");
             var variable_definition_statement = new NonTerminal("variable_definition_statement");
             var assignment_statement = new NonTerminal("assignment_statement");
-            var function_call = new NonTerminal("function_call_statement");
+            var access_statement = new NonTerminal("access_statement");
             var structed_statement = new NonTerminal("structed_statement");
             var if_statement = new NonTerminal("if_statement");
             var else_part_opt = new NonTerminal("else_part_opt");
@@ -203,7 +208,7 @@ namespace Compiler {
 
             /* Basic */
             /* identifier */
-            identifier_ext.Rule = identifier | required_type;
+            identifier_ext.Rule = identifier | required_type;  //??
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
@@ -214,7 +219,10 @@ namespace Compiler {
             member_access_segment.Rule = ( dot + identifier )
                                        | array_indexer
                                        | argument_list_par;
-            array_indexer.Rule = "[" + expression_list + "]";
+           
+
+
+            array_indexer.Rule = "[" + expression + "]";
 
             /* arguments */
             argument_list.Rule = expression;
@@ -323,10 +331,17 @@ namespace Compiler {
             parenthesized_expression.Rule = Lpar + expression + Rpar;
             bin_op_expression.Rule = expression + bin_operator + expression;
             unary_expression.Rule = unary_operator + primary_expression;
+            list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression;
+            list_normal_expression.Rule = ToTerm("[") + expression_list + "]";
+            list_select_expression.Rule = ToTerm("from") + identifier + "in" + expression + "where" + expression + ToTerm("select") + identifier;
+            list_string_expression.Rule = stringLiteral;
+
+
             primary_expression.Rule = literal
                 | unary_expression
                 | parenthesized_expression
-                | member_access;
+                | member_access
+                | list_expression ;
 
             literal.Rule = number | stringLiteral | charLiteral | "True" | "False" | "Null";
 
@@ -339,11 +354,13 @@ namespace Compiler {
                 loop_statement |
                 ret_statement;
             /* 8.2 Simple-statements */
-            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition | function_declaration | type_definition | function_call;
+            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition | function_declaration | type_definition | access_statement ;
 
             variable_definition_statement.Rule = variable_definition + semi;
             assignment_statement.Rule = member_access_list + assignment_operator + expression_list + semi;
-            function_call.Rule = 
+
+            access_statement.Rule = member_access + semi;
+            
             /* 8.3 Structed-statements */
             structed_statement.Rule = if_statement | while_statement | for_statement;
             if_statement.Rule = ToTerm("if") + Lpar + expression + Rpar + scope + else_part_opt;
