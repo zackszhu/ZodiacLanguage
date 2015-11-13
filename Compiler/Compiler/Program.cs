@@ -11,7 +11,6 @@ namespace Compiler {
     public class ZodiacGrammar : Grammar {
 
         public ZodiacGrammar() {
-
             #region Lexical
 
             StringLiteral charLiteral = ZodiacTerminalFactory.CreateZodiacChar("charLiteral");
@@ -25,7 +24,6 @@ namespace Compiler {
             NonGrammarTerminals.Add(mutiLineComment);
             var comment = new NonTerminal("comment");
             comment.Rule = singleLineComment | mutiLineComment;
-
 
             //Symbols
             KeyTerm colon = ToTerm(":", "colon");
@@ -41,7 +39,8 @@ namespace Compiler {
 
             #endregion Lexical
 
-            #region 
+            #region
+
             /* 2 Type declarations and definitions */
             var required_type = new NonTerminal("required_type");
             var simple_type = new NonTerminal("simple_type");
@@ -127,7 +126,6 @@ namespace Compiler {
             var assignment_value_operator = new NonTerminal("assignment_value_operator");
             var assignment_reference_operator = new NonTerminal("assignment_reference_operator");
 
-
             /* 7 Expressions */
             var expression = new NonTerminal("expression");
             var parenthesized_expression = new NonTerminal("parenthesized_expression");
@@ -138,12 +136,12 @@ namespace Compiler {
             var literal = new NonTerminal("literal");
             var expression_list = new NonTerminal("expression_list");
 
-
             /* 8 Statements */
             var statement = new NonTerminal("statement");
             var simple_statement = new NonTerminal("simple_statement");
             var variable_definition_statement = new NonTerminal("variable_definition_statement");
             var assignment_statement = new NonTerminal("assignment_statement");
+            var function_call = new NonTerminal("function_call_statement");
             var structed_statement = new NonTerminal("structed_statement");
             var if_statement = new NonTerminal("if_statement");
             var else_part_opt = new NonTerminal("else_part_opt");
@@ -171,7 +169,6 @@ namespace Compiler {
             var have_sequence_list = new NonTerminal("program_heading");
             var have_sequence = new NonTerminal("program_heading");
 
-
             #endregion NonTerminals
 
             RegisterOperators(-1, "=", ":=");
@@ -187,13 +184,13 @@ namespace Compiler {
             RegisterOperators(10, "*", "/", "%");
             RegisterOperators(11, Associativity.Right, "^^");
 
-
             this.MarkPunctuation(";", ",", "(", ")", "{", "}", "[", "]", ":");
             // this.MarkTransient(type_definition, statement, expression, bin_operator, expression);
-            this.MarkTransient( statement, expression, bin_operator, expression);
+            this.MarkTransient(statement, expression, bin_operator, expression);
 
             var identifier_ext = new NonTerminal("identifier_ext");
             var identifier_list = new NonTerminal("identifier_list");
+            var member_access_list = new NonTerminal("member_access_list");
             var member_access = new NonTerminal("member_access");
             var member_access_segments_opt = new NonTerminal("member_access_segments_opt");
             var member_access_segment = new NonTerminal("member_access");
@@ -209,21 +206,22 @@ namespace Compiler {
             identifier_ext.Rule = identifier | required_type;
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
+            member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
+
             member_access.Rule = identifier_ext + member_access_segments_opt;
+
             member_access_segments_opt.Rule = MakeStarRule(member_access_segments_opt, null, member_access_segment);
-            member_access_segment.Rule = dot + identifier
+            member_access_segment.Rule = ( dot + identifier )
                                        | array_indexer
                                        | argument_list_par;
             array_indexer.Rule = "[" + expression_list + "]";
+
             /* arguments */
             argument_list.Rule = expression;
             argument_list_par.Rule = Lpar + argument_list_opt + Rpar;
             argument_list_par_opt.Rule = Empty | argument_list_par;
             argument_list.Rule = MakePlusRule(argument_list, comma, expression);
             argument_list_opt.Rule = Empty | argument_list;
-
-
-
 
             /* Rule */
             /* 2 Type declarations and definitions */
@@ -234,20 +232,19 @@ namespace Compiler {
             func_type.Rule = ToTerm("func");
 
             /* 2.1 Type-declarations */
-            //type_declaration.Rule = ToTerm("type") + identifier + semi;  
+            //type_declaration.Rule = ToTerm("type") + identifier + semi;
 
             /* 2.2 Type-definitions */
-            basic_type.Rule = (ToTerm("<-") + identifier) | Empty; 
+            basic_type.Rule = (ToTerm("<-") + identifier) | Empty;
             type_definition.Rule = ToTerm("type") + identifier + basic_type + Lbr + structed_type + Rbr; //TODO
-            //type_basic.Rule
-           // type_identifier_list.Rule = MakePlusRule(type_identifier_list, comma, identifier);
+                                                                                                         //type_basic.Rule
+                                                                                                         // type_identifier_list.Rule = MakePlusRule(type_identifier_list, comma, identifier);
             structed_type.Rule = MakeStarRule(structed_type, null, type_member);
             type_member.Rule = member_variable | member_function;
             member_variable.Rule = ToTerm("var") + identifier + assignment_reference_operator + required_type + semi;
             member_family_opt.Rule = ToTerm("family") | Empty;
 
             member_function.Rule = member_family_opt + function_definition;
-
 
             /* 3 Constructors and Converters */
             constructor.Rule = defined_constructor | default_constructor;
@@ -271,7 +268,6 @@ namespace Compiler {
             inherit_converter.Rule = ansc_converter | desc_converter;
             ansc_converter.Rule = ToTerm("ansc") + Lpar + identifier + Rpar;
             desc_converter.Rule = ToTerm("desc") + Lpar + identifier + Rpar;
-
 
             /* 4 Variables definitions */
             variable_definition.Rule = ToTerm("var") + identifier_list + assignment_operator + expression_list;
@@ -317,12 +313,12 @@ namespace Compiler {
             bin_operator.Rule = ToTerm("^^") | "*" | "/" | "%" | "+" | "-" | "<<" | ">>" | "<" | ">" | "==" | "&"
                 | "^" | "|" | "&&" | "||";
 
-           
             assignment_value_operator.Rule = ToTerm(":=");
             assignment_reference_operator.Rule = ToTerm("=");
             assignment_operator.Rule = assignment_value_operator | assignment_reference_operator;
 
             /* 7 Expressions */
+
             expression.Rule = primary_expression | bin_op_expression;
             parenthesized_expression.Rule = Lpar + expression + Rpar;
             bin_op_expression.Rule = expression + bin_operator + expression;
@@ -337,16 +333,17 @@ namespace Compiler {
             expression_list.Rule = MakePlusRule(expression_list, comma, expression);
 
             /* 8 Statements */
-            statement.Rule = 
+            statement.Rule =
                 simple_statement |
                 structed_statement |
                 loop_statement |
                 ret_statement;
             /* 8.2 Simple-statements */
-            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition | function_declaration | type_definition;
+            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition | function_declaration | type_definition | function_call;
 
             variable_definition_statement.Rule = variable_definition + semi;
-            assignment_statement.Rule = member_access + assignment_operator + expression;
+            assignment_statement.Rule = member_access_list + assignment_operator + expression_list + semi;
+            function_call.Rule = 
             /* 8.3 Structed-statements */
             structed_statement.Rule = if_statement | while_statement | for_statement;
             if_statement.Rule = ToTerm("if") + Lpar + expression + Rpar + scope + else_part_opt;
@@ -361,7 +358,7 @@ namespace Compiler {
             /* 8.5 Ret-statements */
             ret_statement.Rule = return_statement | escape_statement;
             return_statement.Rule = ToTerm("return") + argument_list_opt + semi;
-            escape_statement.Rule = ToTerm("escape") + argument_list_opt + semi;
+            escape_statement.Rule = ToTerm("escape") + identifier_list + semi;
 
             /* 9 Scope */
             scope.Rule = Lbr + scope_body_opt + Rbr;
@@ -373,23 +370,20 @@ namespace Compiler {
             declaration.Rule = function_declaration;
             definition.Rule = function_definition | type_definition;
 
-
             /* 11 Program */
-            program.Rule = /*program_heading +*/ scope_body;//hide heading
-            program_heading.Rule = have_sequence_list;
+            program.Rule = program_heading + scope_body;
+            program_heading.Rule = have_sequence_list | Empty;
             have_sequence_list.Rule = MakePlusRule(have_sequence_list, comma, have_sequence);
             have_sequence.Rule = ToTerm("have") + identifier + ".d";
 
-
-
             this.Root = program;
 
-
             #region Define Keywords
-            this.MarkReservedWords("long","real","char","bool","list","func","oper","var","param","return","escape","type","family","static","True"
-                ,"False","if","else","for in","while","break","continue","from","where","select","ance","desc","IO","have","Null");
+
+            this.MarkReservedWords("long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
+                , "False", "if", "else", "for in", "while", "break", "continue", "from", "where", "select", "ance", "desc", "IO", "have", "Null");
+
             #endregion
         }
-
     }
 }
