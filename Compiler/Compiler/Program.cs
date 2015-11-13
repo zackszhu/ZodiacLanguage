@@ -234,10 +234,10 @@ namespace Compiler {
             /* Rule */
             /* 2 Type declarations and definitions */
             /* 2.1 Required-types */
-            required_type.Rule = simple_type | list_type;
-            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char";
+            required_type.Rule = simple_type | list_type | func_type;
+            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" ;
             list_type.Rule = ToTerm("list");
-            func_type.Rule = ToTerm("func");
+            func_type.Rule = ToTerm("funcp");
 
             /* 2.1 Type-declarations */
             //type_declaration.Rule = ToTerm("type") + identifier + semi;
@@ -333,8 +333,9 @@ namespace Compiler {
             unary_expression.Rule = unary_operator + primary_expression;
             list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression;
             list_normal_expression.Rule = ToTerm("[") + expression_list + "]";
+           // list_select_expression.Rule = ToTerm("asdsadasdsa");
             list_select_expression.Rule = ToTerm("from") + identifier + "in" + expression + "where" + expression + ToTerm("select") + identifier;
-            list_string_expression.Rule = stringLiteral;
+            list_string_expression.Rule = ToTerm("\"") + stringLiteral + "\"";
 
 
             primary_expression.Rule = literal
@@ -391,7 +392,7 @@ namespace Compiler {
             program.Rule = program_heading + scope_body;
             program_heading.Rule = have_sequence_list | Empty;
             have_sequence_list.Rule = MakePlusRule(have_sequence_list, comma, have_sequence);
-            have_sequence.Rule = ToTerm("have") + identifier + ".d";
+            have_sequence.Rule = ToTerm("have") + identifier + ".d" ;
 
             this.Root = program;
 
