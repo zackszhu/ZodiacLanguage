@@ -73,3 +73,4 @@ E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.Gra
 E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\obj\Debug\030.Irony.GrammarExplorer.2012.csproj.GenerateResource.Cache
 E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.GrammarExplorer.exe
 E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\obj\Debug\Irony.GrammarExplorer.pdb
+E:\Code\CSharp\compile\Zodiac\Compiler\Irony.GrammarExplorer\bin\Debug\Irony.GrammarExplorer.pdb
