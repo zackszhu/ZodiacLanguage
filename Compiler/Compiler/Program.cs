@@ -45,7 +45,7 @@ namespace Compiler {
             var required_type = new NonTerminal("required_type");
             var simple_type = new NonTerminal("simple_type");
             var list_type = new NonTerminal("list_type");
-          //  var func_type = new NonTerminal("func_type");
+            //  var func_type = new NonTerminal("func_type");
             //var type_declaration = new NonTerminal("type_declaration");
             var type_definition = new NonTerminal("type_definition");
             var structed_type = new NonTerminal("structed_type");
@@ -93,9 +93,9 @@ namespace Compiler {
             var converter_variable = new NonTerminal("converter_variable");
 
             /* 5 Function declarations and definitions */
-           // var function_declaration = new NonTerminal("function_declaration");
-           //  var function_normal_declaration = new NonTerminal("normal_function_declaration");
-           //  var function_operator_declaration = new NonTerminal("operator_function_declaration");
+            // var function_declaration = new NonTerminal("function_declaration");
+            //  var function_normal_declaration = new NonTerminal("normal_function_declaration");
+            //  var function_operator_declaration = new NonTerminal("operator_function_declaration");
             var function_option = new NonTerminal("function_option");
 
             var function_definition = new NonTerminal("function_definition");
@@ -142,7 +142,7 @@ namespace Compiler {
             var list_normal_expression = new NonTerminal("list_normal_expression");
             var list_select_expression = new NonTerminal("list_select_expression");
             var list_string_expression = new NonTerminal("list_string_expression");
-            
+
             var term = new NonTerminal("term");//TODO
             var literal = new NonTerminal("literal");
             var expression_list = new NonTerminal("expression_list");
@@ -222,11 +222,9 @@ namespace Compiler {
             member_access.Rule = identifier_ext + member_access_segments_opt;
 
             member_access_segments_opt.Rule = MakeStarRule(member_access_segments_opt, null, member_access_segment);
-            member_access_segment.Rule = ( dot + identifier )
+            member_access_segment.Rule = (dot + identifier)
                                        | array_indexer
                                        | argument_list_par;
-           
-
 
             array_indexer.Rule = "[" + expression + "]";
 
@@ -241,9 +239,9 @@ namespace Compiler {
             /* 2 Type declarations and definitions */
             /* 2.1 Required-types */
             required_type.Rule = simple_type | list_type /*| func_type*/;
-            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" ;
+            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" | "IO";
             list_type.Rule = ToTerm("list");
-           // func_type.Rule = ToTerm("func");
+            // func_type.Rule = ToTerm("func");
 
             /* 2.1 Type-declarations */
             //type_declaration.Rule = ToTerm("type") + identifier + semi;
@@ -302,12 +300,11 @@ namespace Compiler {
             //constructor_variable.Rule = constructor;
             //converter_variable.Rule = converter;
             /* 5 Function declarations and definition */
-            
 
             function_option.Rule = "static" | Empty;
             function_definition.Rule = function_option + function_normal_definition | function_operator_definition;
-            function_normal_definition.Rule =  "func" + identifier + Lbr + function_body + Rbr;
-            function_operator_definition.Rule = "oper" + bin_operator + Lbr + function_body + Rbr;  
+            function_normal_definition.Rule = "func" + identifier + Lbr + function_body + Rbr;
+            function_operator_definition.Rule = "oper" + bin_operator + Lbr + function_body + Rbr;
 
             function_body.Rule = function_parameter_block + function_instruction_block;
             function_parameter_block.Rule = function_parameter_list | function_parameter_default_list | (function_parameter_list + function_parameter_default_list) | Empty;
@@ -325,7 +322,7 @@ namespace Compiler {
                 unary_operator |
                 pow_operator |
                 bin_operator;
-            unary_operator.Rule = ToTerm("!") | "~" | "+" | "-" ;
+            unary_operator.Rule = ToTerm("!") | "~" | "+" | "-";
 
             bin_operator.Rule = ToTerm("^^") | "*" | "/" | "%" | "+" | "-" | "<<" | ">>" | "<" | ">" | "==" | "&"
                 | "^" | "|" | "&&" | "||";
@@ -342,16 +339,15 @@ namespace Compiler {
             unary_expression.Rule = unary_operator + primary_expression;
             list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression;
             list_normal_expression.Rule = ToTerm("[") + expression_list + "]";
-           // list_select_expression.Rule = ToTerm("asdsadasdsa");
+            // list_select_expression.Rule = ToTerm("asdsadasdsa");
             list_select_expression.Rule = ToTerm("from") + identifier + "in" + expression + "where" + expression + ToTerm("select") + identifier;
             list_string_expression.Rule = ToTerm("\"") + stringLiteral + "\"";
-
 
             primary_expression.Rule = literal
                 | unary_expression
                 | parenthesized_expression
                 | member_access
-                | list_expression ;
+                | list_expression;
 
             literal.Rule = number | stringLiteral | charLiteral | "True" | "False" | "Null";
 
@@ -364,13 +360,13 @@ namespace Compiler {
                 loop_statement |
                 ret_statement;
             /* 8.2 Simple-statements */
-            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition /*| function_declaration */| type_definition | access_statement ;
+            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition /*| function_declaration */| type_definition | access_statement;
 
             variable_definition_statement.Rule = variable_definition + semi;
             assignment_statement.Rule = member_access_list + assignment_operator + expression_list + semi;
 
             access_statement.Rule = member_access + semi;
-            
+
             /* 8.3 Structed-statements */
             structed_statement.Rule = if_statement | while_statement | for_statement;
             if_statement.Rule = ToTerm("if") + Lpar + expression + Rpar + scope + else_part_opt;
@@ -401,13 +397,13 @@ namespace Compiler {
             program.Rule = program_heading + scope_body;
             program_heading.Rule = have_sequence_list | Empty;
             have_sequence_list.Rule = MakePlusRule(have_sequence_list, comma, have_sequence);
-            have_sequence.Rule = ToTerm("have") + identifier + ".d" ;
+            have_sequence.Rule = ToTerm("have") + identifier + ".d";
 
             this.Root = program;
 
-            #region Define Keywords
+            #region Define_Keywords
 
-            this.MarkReservedWords("long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
+            this.MarkReservedWords("IO", "long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
                 , "False", "if", "else", "for in", "while", "break", "continue", "from", "where", "select", "ance", "desc", "IO", "have", "Null");
 
             #endregion

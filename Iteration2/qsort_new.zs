@@ -6,7 +6,7 @@ func qsort{
             from item in arr
             where cmp(item, arr[0]) < 0
             select item
-            ) + 
+            ) +
             from item in arr
             where cmp(item, arr[0]) == 0
             select item
@@ -34,5 +34,5 @@ oper < {
 
 a      = [[1, 2], [1]];
 result = qsort(a, myCmp);
-@@ screen = IO;
-screen.write(result); 
+screen = IO;
+screen.write(result);
