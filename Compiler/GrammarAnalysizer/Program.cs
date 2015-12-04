@@ -6,9 +6,10 @@ namespace Zodiac {
         static void Main(string[] args) {
             var grammarAnalysizer = new GrammarAnalysizer();
             grammarAnalysizer.load();
-            //string code = Console.ReadLine();
-           //grammarAnalysizer.ParseSample(code);
-           //grammarAnalysizer.ShowParseTree();
+            string code = "var a = 1 + 1;var io = IO; io.write(a);";
+            grammarAnalysizer.ParseSample(code);
+            grammarAnalysizer.ShowParseTree();
+            code = Console.ReadLine();
         }
     }
 }

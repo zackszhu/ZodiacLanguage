@@ -11,9 +11,11 @@ namespace Zodiac {
     public class GrammarAnalysizer {
 
         private Grammar _grammar;
+        private LanguageData language;
         private Parser _parser;
-        private ParseTree _parseTree;
+        private ParseTree parseTree;
         GrammarLoader grammarLoader = new GrammarLoader();
+
 
         public GrammarAnalysizer() {
             //grammarLoader.AssemblyUpdated += GrammarAssemblyUpdated;
@@ -31,8 +33,16 @@ namespace Zodiac {
             grammarLoader.SelectedGrammar = SelectGrammars(location);
             if (grammarLoader.SelectedGrammar == null) return;
             _grammar = grammarLoader.CreateGrammar();
-
+            CreateParser();
         }
+        private void CreateParser()
+        {
+            parseTree = null;
+
+            language = new LanguageData(_grammar);
+            _parser = new Parser(language);
+        }
+
         public static GrammarItem SelectGrammars(string assemblyPath)
         {
             var fromGrammars = LoadGrammars(assemblyPath);
@@ -74,7 +84,7 @@ namespace Zodiac {
        
         public void ParseSample(string code) {
             if (_parser == null || !_parser.Language.CanParse()) return;
-            _parseTree = null;
+            parseTree = null;
             GC.Collect(); //to avoid disruption of perf times with occasional collections
             _parser.Context.TracingEnabled = false;//parsetrace not needed for us
             try {
@@ -85,20 +95,29 @@ namespace Zodiac {
                 throw;
             }
             finally {
-                _parseTree = _parser.Context.CurrentParseTree;
+                parseTree = _parser.Context.CurrentParseTree;
             }
         }
 
         public void ShowParseTree()
         {
-            if (_parseTree == null) return;
-            AddParseNodeRec(_parseTree.Root);
+            if (parseTree == null) return;
+            AddParseNodeRec(parseTree.Root);
         }
 
         private void AddParseNodeRec(ParseTreeNode node)
         {
             if (node == null) return;
+            BnfTerm term = node.Term;
             string txt = node.ToString();
+            if(term == null)
+            {
+                txt = "NullTerm";
+            }
+            else
+            {
+                txt = term.GetParseNodeCaption(node);
+            }
             Console.WriteLine(txt);
             foreach (var child in node.ChildNodes)
                 AddParseNodeRec(child);
