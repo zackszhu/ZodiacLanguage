@@ -102,6 +102,7 @@ namespace Compiler {
             var function_normal_definition = new NonTerminal("normal_function_definition");
             var function_operator_definition = new NonTerminal("operator_function_definition");
 
+
             var function_body = new NonTerminal("function_body");
             var function_parameter_block = new NonTerminal("function_parameter_block");
             var function_parameter_list_opt = new NonTerminal("function_parameter_list_opt");
@@ -305,7 +306,9 @@ namespace Compiler {
             
 
             function_option.Rule = "static" | Empty;
+
             function_definition.Rule = function_option + function_normal_definition | function_operator_definition;
+
             function_normal_definition.Rule =  "func" + identifier + Lbr + function_body + Rbr;
             function_operator_definition.Rule = "oper" + bin_operator + Lbr + function_body + Rbr;  
 
