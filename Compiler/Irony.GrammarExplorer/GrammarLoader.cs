@@ -25,7 +25,7 @@ namespace Irony.GrammarExplorer {
   /// <summary>
   /// Maintains grammar assemblies, reloads updated files automatically.
   /// </summary>
-  class GrammarLoader {
+  public class GrammarLoader {
     private TimeSpan _autoRefreshDelay = TimeSpan.FromMilliseconds(1000);
     private static HashSet<string> _probingPaths = new HashSet<string>();
     private Dictionary<string, CachedAssembly> _cachedGrammarAssemblies = new Dictionary<string, CachedAssembly>();

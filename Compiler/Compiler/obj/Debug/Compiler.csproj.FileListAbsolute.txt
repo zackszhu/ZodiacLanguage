@@ -3,11 +3,9 @@ C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Co
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.dll
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.pdb
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Irony.xml
-C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.pdb
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.dll.config
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.dll
-C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.dll
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.dll.CodeAnalysisLog.xml
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\bin\Debug\Compiler.dll.lastcodeanalysissucceeded
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
@@ -54,3 +52,9 @@ C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Irony.Gram
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.dll
 C:\Users\Zacks\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.pdb
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.pdb
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.CodeAnalysisLog.xml
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.lastcodeanalysissucceeded
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.dll
+C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.pdb

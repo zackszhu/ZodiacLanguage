@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "030.Irony.GrammarExplorer.2
 		{421E8DA8-F4AB-4939-8371-BAE76E69DC3E} = {421E8DA8-F4AB-4939-8371-BAE76E69DC3E}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrammarAnalysizer", "GrammarAnalysizer\GrammarAnalysizer.csproj", "{66B9F3B5-EE38-4525-81A8-5E4988CEC302}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{AE1C04A8-B03D-4144-98E9-BF66C50265E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE1C04A8-B03D-4144-98E9-BF66C50265E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE1C04A8-B03D-4144-98E9-BF66C50265E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66B9F3B5-EE38-4525-81A8-5E4988CEC302}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66B9F3B5-EE38-4525-81A8-5E4988CEC302}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66B9F3B5-EE38-4525-81A8-5E4988CEC302}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66B9F3B5-EE38-4525-81A8-5E4988CEC302}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
