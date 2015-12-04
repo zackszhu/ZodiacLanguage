@@ -104,7 +104,6 @@ namespace Irony.GrammarExplorer {
             gridParserTrace.Rows.Clear();
             lstTokens.Items.Clear();
             tvParseTree.Nodes.Clear();
-            tvAst.Nodes.Clear();
             Application.DoEvents();
         }
 
@@ -168,25 +167,6 @@ namespace Irony.GrammarExplorer {
             tvNode.Tag = node;
             foreach (var child in node.ChildNodes)
                 AddParseNodeRec(tvNode, child);
-        }
-
-        private void ShowAstTree() {
-            tvAst.Nodes.Clear();
-            if (_parseTree == null || _parseTree.Root == null || _parseTree.Root.AstNode == null) return;
-            AddAstNodeRec(null, _parseTree.Root.AstNode);
-        }
-
-        private void AddAstNodeRec(TreeNode parent, object astNode) {
-            if (astNode == null) return;
-            string txt = astNode.ToString();
-            TreeNode newNode = (parent == null ?
-              tvAst.Nodes.Add(txt) : parent.Nodes.Add(txt));
-            newNode.Tag = astNode;
-            var iBrowsable = astNode as IBrowsableAstNode;
-            if (iBrowsable == null) return;
-            var childList = iBrowsable.GetChildNodes();
-            foreach (var child in childList)
-                AddAstNodeRec(newNode, child);
         }
 
         private void ShowParserConstructionResults() {
@@ -370,7 +350,6 @@ namespace Irony.GrammarExplorer {
                 }
                 ShowCompileStats();
                 ShowParseTree();
-                ShowAstTree();
             }
         }
 
@@ -549,16 +528,6 @@ namespace Irony.GrammarExplorer {
             ShowSourcePosition(parseNode.Span.Location.Position, 1);
         }
 
-        private void tvAst_AfterSelect(object sender, TreeViewEventArgs e) {
-            if (_treeClickDisabled)
-                return;
-            var treeNode = tvAst.SelectedNode;
-            if (treeNode == null) return;
-            var iBrowsable = treeNode.Tag as IBrowsableAstNode;
-            if (iBrowsable == null) return;
-            ShowSourcePosition(iBrowsable.Position, 1);
-        }
-
         private bool _changingGrammar;
 
         private void LoadSelectedGrammar() {
@@ -697,9 +666,7 @@ namespace Irony.GrammarExplorer {
                 ParseSample();
             var p = txtSource.SelectionStart;
             tvParseTree.SelectedNode = null; //just in case we won't find
-            tvAst.SelectedNode = null;
             SelectTreeNode(tvParseTree, LocateTreeNode(tvParseTree.Nodes, p, node => (node.Tag as ParseTreeNode).Span.Location.Position));
-            SelectTreeNode(tvAst, LocateTreeNode(tvAst.Nodes, p, node => (node.Tag as IBrowsableAstNode).Position));
             txtSource.Focus(); //set focus back to source
         }
 
