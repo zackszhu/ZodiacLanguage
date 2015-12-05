@@ -14,8 +14,13 @@ namespace Zodiac {
         private LanguageData language;
         private Parser parser;
         private ParseTree parseTree;
-        GrammarLoader grammarLoader = new GrammarLoader();
+        public ParseTree ParseTree
+        {
+            get { return parseTree; }
+        }
 
+        GrammarLoader grammarLoader = new GrammarLoader();
+        
 
         public GrammarAnalysizer() {
             //grammarLoader.AssemblyUpdated += GrammarAssemblyUpdated;
@@ -101,14 +106,16 @@ namespace Zodiac {
         public void ShowParseTree()
         {
             if (parseTree == null) return;
-            AddParseNodeRec(parseTree.Root);
+            AddParseNodeRec(0, parseTree.Root);
         }
 
-        private void AddParseNodeRec(ParseTreeNode node)
+        private void AddParseNodeRec(int depth, ParseTreeNode node)
         {
             if (node == null) return;
             BnfTerm term = node.Term;
+
             string txt = node.ToString();
+
             if(term == null)
             {
                 txt = "NullTerm";
@@ -117,9 +124,21 @@ namespace Zodiac {
             {
                 txt = term.GetParseNodeCaption(node);
             }
-            Console.WriteLine(txt);
+            //var t = " "*6;
+            for (int i = 0; i < depth; i++) Console.Write("  ");
+
+            if (node.Token != null)
+            {
+                Console.WriteLine(node.Token.Value + " " + node.Token.Terminal.ToString());
+            }
+            else
+               Console.WriteLine(node.Term.Name );
+
+            
+
+           // Console.WriteLine(node.ToString());
             foreach (var child in node.ChildNodes)
-                AddParseNodeRec(child);
+                AddParseNodeRec(depth+1, child);
         }
 
        

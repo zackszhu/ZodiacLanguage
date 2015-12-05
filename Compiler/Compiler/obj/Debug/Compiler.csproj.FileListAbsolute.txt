@@ -58,3 +58,9 @@ C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.lastcodeanalysissucceeded
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.dll
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.pdb
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.pdb
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.CodeAnalysisLog.xml
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Irony.GrammarExplorer\bin\Debug\Zodiac.dll.lastcodeanalysissucceeded
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.dll
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.pdb
