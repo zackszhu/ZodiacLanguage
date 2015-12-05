@@ -33,8 +33,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IKVM.Reflection, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\aqla.runsharp.0.2.0.2\lib\net20\IKVM.Reflection.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Irony, Version=1.0.0.0, Culture=neutral, PublicKeyToken=ca48ace7223ead47, processorArchitecture=MSIL">
       <HintPath>..\packages\Irony.0.9.1\lib\net40\Irony.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RunSharp, Version=0.2.0.0, Culture=neutral, PublicKeyToken=be9f22c3116c2290, processorArchitecture=MSIL">
+      <HintPath>..\packages\aqla.runsharp.0.2.0.2\lib\net20\RunSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -49,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GrammarAnalysizer.cs" />
+    <Compile Include="ILGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

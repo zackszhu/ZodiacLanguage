@@ -5,7 +5,6 @@ namespace Zodiac {
         [STAThread]
         static void Main(string[] args) {
             var grammarAnalysizer = new GrammarAnalysizer();
-            grammarAnalysizer.load();
             string code = "var a = 1 + 1;var io = IO; io.write(a);";
             grammarAnalysizer.ParseSample(code);
             grammarAnalysizer.ShowParseTree();

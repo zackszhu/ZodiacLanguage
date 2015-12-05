@@ -10,19 +10,20 @@ using System.IO;
 namespace Zodiac {
     public class GrammarAnalysizer {
 
-        private Grammar _grammar;
+        private Grammar grammar;
         private LanguageData language;
-        private Parser _parser;
+        private Parser parser;
         private ParseTree parseTree;
         GrammarLoader grammarLoader = new GrammarLoader();
 
 
         public GrammarAnalysizer() {
             //grammarLoader.AssemblyUpdated += GrammarAssemblyUpdated;
+            LoadGrammar();
+            CreateParser();
         }
 
-        public void load()
-        {
+        private void LoadGrammar() {
             var dlgSelectAssembly = new System.Windows.Forms.OpenFileDialog();
             dlgSelectAssembly.DefaultExt = "dll";
             dlgSelectAssembly.Filter = "DLL files|*.dll";
@@ -32,18 +33,16 @@ namespace Zodiac {
             if (string.IsNullOrEmpty(location)) return;
             grammarLoader.SelectedGrammar = SelectGrammars(location);
             if (grammarLoader.SelectedGrammar == null) return;
-            _grammar = grammarLoader.CreateGrammar();
-            CreateParser();
+            grammar = grammarLoader.CreateGrammar();
         }
         private void CreateParser()
         {
             parseTree = null;
-
-            language = new LanguageData(_grammar);
-            _parser = new Parser(language);
+            language = new LanguageData(grammar);
+            parser = new Parser(language);
         }
 
-        public static GrammarItem SelectGrammars(string assemblyPath)
+        private GrammarItem SelectGrammars(string assemblyPath)
         {
             var fromGrammars = LoadGrammars(assemblyPath);
             if (fromGrammars == null)
@@ -53,7 +52,7 @@ namespace Zodiac {
             return result;
         }
 
-        private static GrammarItemList LoadGrammars(string assemblyPath)
+        private GrammarItemList LoadGrammars(string assemblyPath)
         {
             Assembly asm = null;
             try
@@ -83,19 +82,19 @@ namespace Zodiac {
 
        
         public void ParseSample(string code) {
-            if (_parser == null || !_parser.Language.CanParse()) return;
+            if (parser == null || !parser.Language.CanParse()) return;
             parseTree = null;
             GC.Collect(); //to avoid disruption of perf times with occasional collections
-            _parser.Context.TracingEnabled = false;//parsetrace not needed for us
+            parser.Context.TracingEnabled = false;//parsetrace not needed for us
             try {
-                _parser.Parse(code, "<source>");
+                parser.Parse(code, "<source>");
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 throw;
             }
             finally {
-                parseTree = _parser.Context.CurrentParseTree;
+                parseTree = parser.Context.CurrentParseTree;
             }
         }
 
