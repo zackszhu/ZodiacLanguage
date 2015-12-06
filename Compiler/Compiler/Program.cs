@@ -216,7 +216,7 @@ namespace Compiler {
 
             /* Basic */
             /* identifier */
-            identifier_ext.Rule = identifier | required_type;  //??
+            identifier_ext.Rule = identifier | required_type | inherit_converter;  //??
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
@@ -280,8 +280,8 @@ namespace Compiler {
             /* 3.4 Converter */
             converter.Rule = constructor | inherit_converter;
             inherit_converter.Rule = ansc_converter | desc_converter;
-            ansc_converter.Rule = ToTerm("ansc") + Lpar + identifier + Rpar;
-            desc_converter.Rule = ToTerm("desc") + Lpar + identifier + Rpar;
+            ansc_converter.Rule = ToTerm("ance");
+            desc_converter.Rule = ToTerm("desc");
 
             /* 4 Variables definitions */
             variable_definition.Rule = ToTerm("var") + identifier_list + assignment_operator + expression_list;
@@ -362,6 +362,7 @@ namespace Compiler {
 
             /* 8 Statements */
             statement.Rule =
+                scope |
                 simple_statement |
                 structed_statement |
                 loop_statement |
