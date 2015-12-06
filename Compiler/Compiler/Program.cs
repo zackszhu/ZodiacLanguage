@@ -307,12 +307,11 @@ namespace Compiler {
 
             function_definition.Rule = function_option + (function_normal_definition | function_operator_definition) + return_type_definition + Lbr + function_body + Rbr;
 
-            function_normal_definition.Rule =  "func" + identifier ;
-            function_operator_definition.Rule = "oper" + bin_operator ;
+            function_normal_definition.Rule = "func" + identifier;
+            function_operator_definition.Rule = "oper" + bin_operator;
 
-            return_type_definition.Rule = Empty | (":" + return_type_list );
-            return_type_list.Rule = MakePlusRule(return_type_list,ToTerm(","),required_type);
-
+            return_type_definition.Rule = Empty | (":" + return_type_list);
+            return_type_list.Rule = MakePlusRule(return_type_list, ToTerm(","), required_type);
 
             function_body.Rule = function_parameter_block + function_instruction_block;
             function_parameter_block.Rule = function_parameter_list | function_parameter_default_list | (function_parameter_list + function_parameter_default_list) | Empty;
