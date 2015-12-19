@@ -46,7 +46,7 @@ namespace Zodiac
         {
             IOClass = ag.Public.Class("IO");
             CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
-                .Parameter(typeof(string),"arg");
+                .Parameter(typeof(string), "arg");
             {
                 var arg = writeStrMethod.Arg("arg");
                 writeStrMethod.Local();

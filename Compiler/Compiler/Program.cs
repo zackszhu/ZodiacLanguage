@@ -141,6 +141,7 @@ namespace Compiler {
             var unary_expression = new NonTerminal("unary_expression");
             var primary_expression = new NonTerminal("primary_expression");
             var list_expression = new NonTerminal("list_expression");
+            var list_subscript_expression = new NonTerminal("list_subscript_expression");
             var list_normal_expression = new NonTerminal("list_normal_expression");
             var list_select_expression = new NonTerminal("list_select_expression");
             var list_string_expression = new NonTerminal("list_string_expression");
@@ -205,8 +206,9 @@ namespace Compiler {
             var identifier_list = new NonTerminal("identifier_list");
             var member_access_list = new NonTerminal("member_access_list");
             var member_access = new NonTerminal("member_access");
+            var member_access_with_segement = new NonTerminal("member_access");
             var member_access_segments_opt = new NonTerminal("member_access_segments_opt");
-            var member_access_segment = new NonTerminal("member_access");
+            var member_access_segment = new NonTerminal("member_access_segment");
             var array_indexer = new NonTerminal("array_indexer");
             var argument = new NonTerminal("argument");
             var argument_list_par = new NonTerminal("argument_list_par");
@@ -220,10 +222,11 @@ namespace Compiler {
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
-
-            member_access.Rule = identifier_ext + member_access_segments_opt;
-
-            member_access_segments_opt.Rule = MakeStarRule(member_access_segments_opt, null, member_access_segment);
+            
+            member_access_with_segement.Rule = member_access + member_access_segment;
+            member_access.Rule = identifier_ext | member_access_with_segement;
+            
+            member_access_segments_opt.Rule = member_access_segment | Empty;//MakeStarRule(member_access_segments_opt, null, member_access_segment);
             member_access_segment.Rule = (dot + identifier)
                                        | array_indexer
                                        | argument_list_par;
@@ -270,10 +273,13 @@ namespace Compiler {
             defined_constructor.Rule = required_type_defined_constructor | structed_type_default_constructor;
             required_type_defined_constructor.Rule = simple_type_defined_constructor | list_type_defined_constructor;
             simple_type_defined_constructor.Rule = simple_type + Lpar + expression + Rbr;
+
             list_type_defined_constructor.Rule = list_type + (range_parameter | indexed_parameter);
+
             range_parameter.Rule = Lpar + range + comma + range_parameter + Rpar;
             range.Rule = expression;
             indexed_parameter.Rule = Lbra + index + comma + index + Rbra + (range_parameter | fill_parameter);
+
             fill_parameter.Rule = Lpar + expression + Rpar;
             index.Rule = expression;
             structed_type_defined_constructor.Rule = structed_type_identifier + Lpar + Rpar;//------
@@ -345,9 +351,11 @@ namespace Compiler {
             parenthesized_expression.Rule = Lpar + expression + Rpar;
             bin_op_expression.Rule = expression + bin_operator + expression;
             unary_expression.Rule = unary_operator + primary_expression;
-            list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression;
+            list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression | list_subscript_expression;
+
+            
             list_normal_expression.Rule = ToTerm("[") + expression_list + "]";
-            // list_select_expression.Rule = ToTerm("asdsadasdsa");
+            list_subscript_expression.Rule = ToTerm("List") + "[" + expression + comma + expression + "]" + "(" + expression + ")";
             list_select_expression.Rule = ToTerm("from") + identifier + "in" + expression + "where" + expression + ToTerm("select") + identifier;
             list_string_expression.Rule = ToTerm("\"") + stringLiteral + "\"";
 
@@ -363,6 +371,7 @@ namespace Compiler {
 
             /* 8 Statements */
             statement.Rule =
+                scope |
                 simple_statement |
                 structed_statement |
                 loop_statement |
