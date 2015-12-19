@@ -1,27 +1,25 @@
-﻿using System;
+﻿using Irony.Parsing;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using Irony.Parsing;
-using System.Windows.Forms;
-using Irony.GrammarExplorer;
-using System.Reflection;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace Zodiac {
-    public class GrammarAnalysizer {
 
+    public class GrammarAnalysizer {
         private Grammar grammar;
         private LanguageData language;
         private Parser parser;
         private ParseTree parseTree;
-        public ParseTree ParseTree
-        {
+
+        public ParseTree ParseTree {
             get { return parseTree; }
         }
 
-        GrammarLoader grammarLoader = new GrammarLoader();
+        private GrammarLoader grammarLoader = new GrammarLoader();
         
-
         public GrammarAnalysizer() {
             //grammarLoader.AssemblyUpdated += GrammarAssemblyUpdated;
             LoadGrammar();
@@ -40,15 +38,14 @@ namespace Zodiac {
             if (grammarLoader.SelectedGrammar == null) return;
             grammar = grammarLoader.CreateGrammar();
         }
-        private void CreateParser()
-        {
+
+        private void CreateParser() {
             parseTree = null;
             language = new LanguageData(grammar);
             parser = new Parser(language);
         }
 
-        private GrammarItem SelectGrammars(string assemblyPath)
-        {
+        private GrammarItem SelectGrammars(string assemblyPath) {
             var fromGrammars = LoadGrammars(assemblyPath);
             if (fromGrammars == null)
                 return null;
@@ -57,35 +54,29 @@ namespace Zodiac {
             return result;
         }
 
-        private GrammarItemList LoadGrammars(string assemblyPath)
-        {
+        private GrammarItemList LoadGrammars(string assemblyPath) {
             Assembly asm = null;
-            try
-            {
+            try {
                 asm = GrammarLoader.LoadAssembly(assemblyPath);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 MessageBox.Show("Failed to load assembly: " + ex.Message);
                 return null;
             }
             var types = asm.GetTypes();
             var grammars = new GrammarItemList();
-            foreach (Type t in types)
-            {
+            foreach (Type t in types) {
                 if (t.IsAbstract) continue;
                 if (!t.IsSubclassOf(typeof(Grammar))) continue;
                 grammars.Add(new GrammarItem(t, assemblyPath));
             }
-            if (grammars.Count == 0)
-            {
+            if (grammars.Count == 0) {
                 MessageBox.Show("No classes derived from Irony.Grammar were found in the assembly.");
                 return null;
             }
             return grammars;
         }
 
-       
         public void ParseSample(string code) {
             if (parser == null || !parser.Language.CanParse()) return;
             parseTree = null;
@@ -103,46 +94,35 @@ namespace Zodiac {
             }
         }
 
-        public void ShowParseTree()
-        {
+        public void ShowParseTree() {
             if (parseTree == null) return;
             AddParseNodeRec(0, parseTree.Root);
         }
 
-        private void AddParseNodeRec(int depth, ParseTreeNode node)
-        {
+        private void AddParseNodeRec(int depth, ParseTreeNode node) {
             if (node == null) return;
             BnfTerm term = node.Term;
 
             string txt = node.ToString();
 
-            if(term == null)
-            {
+            if (term == null) {
                 txt = "NullTerm";
             }
-            else
-            {
+            else {
                 txt = term.GetParseNodeCaption(node);
             }
             //var t = " "*6;
             for (int i = 0; i < depth; i++) Console.Write("  ");
 
-            if (node.Token != null)
-            {
+            if (node.Token != null) {
                 Console.WriteLine(node.Token.Value + " " + node.Token.Terminal.ToString());
             }
             else
-               Console.WriteLine(node.Term.Name );
-
-            
+                Console.WriteLine(node.Term.Name);
 
            // Console.WriteLine(node.ToString());
             foreach (var child in node.ChildNodes)
-                AddParseNodeRec(depth+1, child);
+                AddParseNodeRec(depth + 1, child);
         }
-
-       
-        
-
     }
 }

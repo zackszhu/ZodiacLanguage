@@ -59,18 +59,14 @@
   <ItemGroup>
     <Compile Include="GrammarAnalysizer.cs" />
     <Compile Include="CodeGenerator.cs" />
+    <Compile Include="GrammarItemList.cs" />
+    <Compile Include="GrammarLoader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Irony.GrammarExplorer\030.Irony.GrammarExplorer.2012.csproj">
-      <Project>{ae1c04a8-b03d-4144-98e9-bf66c50265e7}</Project>
-      <Name>030.Irony.GrammarExplorer.2012</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

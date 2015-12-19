@@ -218,7 +218,7 @@ namespace Compiler {
 
             /* Basic */
             /* identifier */
-            identifier_ext.Rule = identifier | required_type;  //??
+            identifier_ext.Rule = identifier | required_type | inherit_converter;  //??
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
@@ -286,8 +286,8 @@ namespace Compiler {
             /* 3.4 Converter */
             converter.Rule = constructor | inherit_converter;
             inherit_converter.Rule = ansc_converter | desc_converter;
-            ansc_converter.Rule = ToTerm("ansc") + Lpar + identifier + Rpar;
-            desc_converter.Rule = ToTerm("desc") + Lpar + identifier + Rpar;
+            ansc_converter.Rule = ToTerm("ance");
+            desc_converter.Rule = ToTerm("desc");
 
             /* 4 Variables definitions */
             variable_definition.Rule = ToTerm("var") + identifier_list + assignment_operator + expression_list;
@@ -313,12 +313,11 @@ namespace Compiler {
 
             function_definition.Rule = function_option + (function_normal_definition | function_operator_definition) + return_type_definition + Lbr + function_body + Rbr;
 
-            function_normal_definition.Rule =  "func" + identifier ;
-            function_operator_definition.Rule = "oper" + bin_operator ;
+            function_normal_definition.Rule = "func" + identifier;
+            function_operator_definition.Rule = "oper" + bin_operator;
 
-            return_type_definition.Rule = Empty | (":" + return_type_list );
-            return_type_list.Rule = MakePlusRule(return_type_list,ToTerm(","),required_type);
-
+            return_type_definition.Rule = Empty | (":" + return_type_list);
+            return_type_list.Rule = MakePlusRule(return_type_list, ToTerm(","), required_type);
 
             function_body.Rule = function_parameter_block + function_instruction_block;
             function_parameter_block.Rule = function_parameter_list | function_parameter_default_list | (function_parameter_list + function_parameter_default_list) | Empty;

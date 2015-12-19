@@ -1,34 +1,28 @@
-﻿using System;
+﻿using Irony.Parsing;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Irony.Parsing;
-using TryAxis.RunSharp;
 using TriAxis.RunSharp;
+using TryAxis.RunSharp;
 
-namespace Zodiac
-{
-    class CodeGenerator
-    {
+namespace Zodiac {
+
+    internal class CodeGenerator {
         private string name;
-        private Hashtable varTable;  
+        private Hashtable varTable;
         private AssemblyGen ag;
         private StaticFactory st;
         private ExpressionFactory exp;
         private TypeGen defaultClass;
         private CodeGen mainMethod;
-        TypeGen IOClass;
+        private TypeGen IOClass;
 
-
-
-
-
-        public CodeGenerator()
-        {
+        public CodeGenerator() {
             varTable = new Hashtable();
             name = "ZodiacConsole";
             string exeDir = string.Empty;
@@ -42,8 +36,7 @@ namespace Zodiac
             exp = ag.ExpressionFactory;
         }
 
-        public void initIO()
-        {
+        public void initIO() {
             IOClass = ag.Public.Class("IO");
             CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
                 .Parameter(typeof(string), "arg");
@@ -62,24 +55,18 @@ namespace Zodiac
             }
         }
 
-        private void initTypeMethod()
-        {
+        private void initTypeMethod() {
             // take long as a method
         }
 
-        public void Generate(ParseTree parseTree)
-        {
+        public void Generate(ParseTree parseTree) {
             if (parseTree == null) return;
 
-            
-
             defaultClass = ag.Public.Class("Default");
-            mainMethod = defaultClass.Public.Static.Method(typeof(void),"Main");
+            mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
             initIO();
-           // initTypeMethod();
-            
-           
- 
+            // initTypeMethod();
+
             //mainMethod.Invoke(IOvar, "write", str);
 
             AddParseNodeRec(parseTree.Root);
@@ -90,24 +77,23 @@ namespace Zodiac
 
             //GenHello1(ag,parseTree);
 
-
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
         }
 
-        private void AddParseNodeRec(ParseTreeNode node)
-        {
+        private void AddParseNodeRec(ParseTreeNode node) {
             if (node == null) return;
             BnfTerm term = node.Term;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
-            switch (bnf)
-            {
+            switch (bnf) {
                 case BNF.variable_definition:
                     VariableDefinition(node);
                     break;
+
                 case BNF.member_access:
-                   // memberAccess(node);
+                    // memberAccess(node);
                     break;
+
                 default:
                     break;
             }
@@ -115,9 +101,7 @@ namespace Zodiac
                 AddParseNodeRec(child);
         }
 
-        private void VariableDefinition(ParseTreeNode node)
-        {
-
+        private void VariableDefinition(ParseTreeNode node) {
             //ParseTreeNodeList childList = node.ChildNodes;
             //get variable name
 
@@ -130,9 +114,8 @@ namespace Zodiac
             var idtIter = idtList.GetEnumerator();
             var expIter = expList.GetEnumerator();
 
-            while (idtIter.MoveNext() && expIter.MoveNext())
-            {
-                var ExpressionNode = expIter.Current as ParseTreeNode;  
+            while (idtIter.MoveNext() && expIter.MoveNext()) {
+                var ExpressionNode = expIter.Current as ParseTreeNode;
                 string name = (idtIter.Current as ParseTreeNode).Token.Text;
                 varTable.Add(name, Expression(ExpressionNode));
             }
@@ -142,29 +125,27 @@ namespace Zodiac
             //
         }
 
-        private ContextualOperand Expression(ParseTreeNode node)
-        {
+        private ContextualOperand Expression(ParseTreeNode node) {
             if (node == null) return null;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
-            switch (bnf)
-            {
+            switch (bnf) {
                 case BNF.number:
-                    return mainMethod.Local(typeof(int),int.Parse(node.Token.Text));
+                    return mainMethod.Local(typeof(int), int.Parse(node.Token.Text));
+
                 case BNF.member_access:
                     return MemberAccess(node);
+
                 default:
                     //@TODO
                     if (node.ChildNodes.Count == 3)
-                        return Expression(node.ChildNodes[0]).Add( Expression(node.ChildNodes[2]));
+                        return Expression(node.ChildNodes[0]).Add(Expression(node.ChildNodes[2]));
                     //return mainMethod.AssignAdd(Expression(node.ChildNodes[0]), Expression(node.ChildNodes[2])) );
                     break;
             }
             return Expression(node.ChildNodes[0]);
         }
 
-
-        private ContextualOperand MemberAccess(ParseTreeNode node) 
-        {
+        private ContextualOperand MemberAccess(ParseTreeNode node) {
             return null;
             /*
             if (node == null) return null;
@@ -173,10 +154,12 @@ namespace Zodiac
             {
                 case BNF.identifier:
                     return (ContextualOperand) varTable[node.Token.Text];
+
                 case BNF.member_access:
                     return MemberAccess(node);
+
                 case BNF.Keyword: //type
-                    return 
+                    return
 
                 default:
                     //@TODO
@@ -186,7 +169,7 @@ namespace Zodiac
             //string Identifier = childlist[0].ChildNodes[0].Token.Text;
             var idtExtNode = node.ChildNodes[0].ChildNodes[0];
 
-            // is 
+            // is
             var ExtNodeBNF =GetBNF(idtExtNode.Token.Terminal.ToString() );
 
             if (ExtNodeBNF == BNF.identifier)
@@ -196,58 +179,43 @@ namespace Zodiac
             else
             {
                 var typeName = idtExtNode.ChildNodes[0].ChildNodes[0].Token.Text;
-
-
             }
 
             //for (int i=1; i< childlist.)
 
-
             return null;*/
         }
 
-
-        public void GenHello1(AssemblyGen ag, ParseTree ParseTree)
-        {
-            
+        public void GenHello1(AssemblyGen ag, ParseTree ParseTree) {
             TypeGen Hello1 = ag.Public.Class("Main");
             CodeGen main = Hello1.Public.Static.Method(typeof(void), "Main");
             Operand str = main.Local(typeof(string));
-        
 
             ITypeMapper TypeMapper = ag.TypeMapper;
             var staticF = ag.StaticFactory;
             //main.Assign(str, staticF.Invoke(TypeMapper.MapType(typeof(Console)), "ReadLine"));
             //main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", str);
-            if (Console.ReadLine() == "111")
-            {
+            if (Console.ReadLine() == "111") {
                 main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", "111");
             }
-            else
-            {
+            else {
                 main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", "222");
             }
         }
 
-        private BNF GetBNF(string BNFString)
-        {
+        private BNF GetBNF(string BNFString) {
             BNF bnf;
-            try
-            {
+            try {
                 bnf = (BNF)Enum.Parse(typeof(BNF), BNFString);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 //for identifier like "1 <identifier>",then mannally set bnf = identifier
                 bnf = BNF.program;
             }
             return bnf;
         }
 
-
-
-        private enum BNF
-        {
+        private enum BNF {
             program = 0,
             program_heading,
             scope_body,
