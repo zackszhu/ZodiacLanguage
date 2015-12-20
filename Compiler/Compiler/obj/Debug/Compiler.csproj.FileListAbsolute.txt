@@ -64,3 +64,4 @@ E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Zodiac.dll
 E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Zodiac.pdb
 E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Zodiac.dll.CodeAnalysisLog.xml
 E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Zodiac.dll.lastcodeanalysissucceeded
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
