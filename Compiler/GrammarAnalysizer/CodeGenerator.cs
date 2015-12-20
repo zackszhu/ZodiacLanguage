@@ -82,19 +82,14 @@ namespace Zodiac {
             defaultClass = ag.Public.Class("Default");
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
             initIO();
-            // initTypeMethod();
-
-            //mainMethod.Invoke(IOvar, "write", str);
 
 
             AddParseNodeRec(parseTree.Root);
 
            
 
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["a"]);
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["b"]);
-
-            //GenHello1(ag,parseTree);
+            mainMethod.Invoke(IOvar, "write", (Operand)varTable["a"]);
+            mainMethod.Invoke(IOvar, "write", (Operand)varTable["b"]);
 
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
@@ -192,10 +187,6 @@ namespace Zodiac {
             func.Invoke(ret, "Add", a);
             func.Invoke(ret, "Add", b);
             
-            //var IOvar = func.Local(exp.New(IOClass));
-           // func.Invoke(IOvar, "write", a.Invoke("GetType", ag.TypeMapper).Invoke("ToString"));
-            
-
 
             func.Return(ret);
         }

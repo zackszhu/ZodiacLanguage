@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssistFunction.cs" />
     <Compile Include="GrammarAnalysizer.cs" />
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="GrammarItemList.cs" />
