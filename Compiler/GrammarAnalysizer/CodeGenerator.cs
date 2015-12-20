@@ -11,16 +11,31 @@ using TriAxis.RunSharp;
 using TryAxis.RunSharp;
 
 namespace Zodiac {
+    public enum Ztype { zlong = 0, zbool, zreal, zlist, zType }
+    class ZOperand
+    {
+        
+        public ZOperand(Operand oper, Ztype z) {
+            operand = oper;
+            ztype = z;
+        }
+
+        public Operand operand;
+        public Ztype ztype;
+    }
+
 
     internal class CodeGenerator {
         private string name;
-        private Hashtable varTable;
+        private Hashtable varTable;  // < string, >
         private AssemblyGen ag;
         private StaticFactory st;
         private ExpressionFactory exp;
         private TypeGen defaultClass;
         private CodeGen mainMethod;
         private TypeGen IOClass;
+        private Operand IOvar;
+
 
         public CodeGenerator() {
             varTable = new Hashtable();
@@ -53,6 +68,8 @@ namespace Zodiac {
                 writeIntMethod.Local();
                 writeIntMethod.WriteLine(arg);
             }
+
+            IOvar = mainMethod.Local(exp.New(IOClass));
         }
 
         private void initTypeMethod() {
@@ -69,9 +86,11 @@ namespace Zodiac {
 
             //mainMethod.Invoke(IOvar, "write", str);
 
+
             AddParseNodeRec(parseTree.Root);
 
-            var IOvar = mainMethod.Local(exp.New(IOClass));
+           
+
             mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["a"]);
             mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["b"]);
 
@@ -99,9 +118,10 @@ namespace Zodiac {
                 AddParseNodeRec(child);
         }
 
-        private void VariableDefinition(ParseTreeNode node) {
+        private void VariableDefinition(ParseTreeNode node , CodeGen ownerScope = null) {
             //ParseTreeNodeList childList = node.ChildNodes;
             //get variable name
+            if (ownerScope == null) ownerScope = mainMethod;
 
             var nameList = new List<string>();
 
@@ -111,7 +131,7 @@ namespace Zodiac {
             var expList = node.ChildNodes[3].ChildNodes;
             var idtIter = idtList.GetEnumerator();
             var expIter = expList.GetEnumerator();
-
+            
             if(idtList.Count == expList.Count)
             {
                 while (idtIter.MoveNext() && expIter.MoveNext())
@@ -124,10 +144,13 @@ namespace Zodiac {
             else
             {
                 ContextualOperand ret = mainMethod.Local(typeof(ArrayList));
-                mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(Operand)varTable["i"], (Operand)varTable["j"]));
-                Operand a = mainMethod.Local(typeof(int));
+                mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(varTable["i"] as ZOperand).operand , (varTable["j"] as ZOperand).operand));
+                ContextualOperand a = mainMethod.Local(typeof(int));
                 Operand b = mainMethod.Local(typeof(int));
+
+                //b = a.Ref();
                 
+
                 mainMethod.Assign(a, ret[0].Cast(typeof(int)));
                 mainMethod.Assign(b, ret[1].Cast(typeof(int)));
                 varTable.Add("a", a);
@@ -159,22 +182,35 @@ namespace Zodiac {
                 func = masterClass.Public.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
 
             Operand a = func.Arg(para1);
+
+            
+
+            
+  
             Operand b = func.Arg(para2);
             Operand ret = func.Local(typeof(ArrayList), exp.New(typeof(ArrayList)));
             func.Invoke(ret, "Add", a);
             func.Invoke(ret, "Add", b);
             
+            //var IOvar = func.Local(exp.New(IOClass));
+           // func.Invoke(IOvar, "write", a.Invoke("GetType", ag.TypeMapper).Invoke("ToString"));
+            
+
+
             func.Return(ret);
         }
 
 
 
-        private Operand Expression(ParseTreeNode node) {
-            if (node == null) return null;
+        private ZOperand Expression(ParseTreeNode node ,CodeGen ownerScope = null )
+        {
+            if (ownerScope == null) ownerScope = mainMethod;
+            if (node == null ) return null;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
             switch (bnf) {
                 case BNF.number:
-                    return mainMethod.Local(typeof(int), int.Parse(node.Token.Text));
+                   
+                    return new ZOperand(ownerScope.Local(typeof(int), int.Parse(node.Token.Text)),Ztype.zlong);
 
                 case BNF.member_access:
                     return MemberAccess(node);
@@ -182,14 +218,17 @@ namespace Zodiac {
                 default:
                     //@TODO
                     if (node.ChildNodes.Count == 3)
-                        return Expression(node.ChildNodes[0]).Add(Expression(node.ChildNodes[2]));
+                    {
+                        return new ZOperand(Expression(node.ChildNodes[0]).operand.Add(Expression(node.ChildNodes[2]).operand),Ztype.zlong);
+
+                    }
                     //return mainMethod.AssignAdd(Expression(node.ChildNodes[0]), Expression(node.ChildNodes[2])) );
                     break;
             }
             return Expression(node.ChildNodes[0]);
         }
 
-        private ContextualOperand MemberAccess(ParseTreeNode node) {
+        private ZOperand MemberAccess(ParseTreeNode node) {
             return null;
             /*
             if (node == null) return null;
@@ -229,13 +268,14 @@ namespace Zodiac {
 
             return null;*/
         }
-
+        
         public void GenHello1(AssemblyGen ag, ParseTree ParseTree) {
             TypeGen Hello1 = ag.Public.Class("Main");
             CodeGen main = Hello1.Public.Static.Method(typeof(void), "Main");
             Operand str = main.Local(typeof(string));
 
             ITypeMapper TypeMapper = ag.TypeMapper;
+            
             var staticF = ag.StaticFactory;
             //main.Assign(str, staticF.Invoke(TypeMapper.MapType(typeof(Console)), "ReadLine"));
             //main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", str);
@@ -246,7 +286,7 @@ namespace Zodiac {
                 main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", "222");
             }
         }
-
+        
         private BNF GetBNF(string BNFString) {
             BNF bnf;
             try {
