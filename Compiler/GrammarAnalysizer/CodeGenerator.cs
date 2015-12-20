@@ -14,7 +14,8 @@ namespace Zodiac {
 
     internal class CodeGenerator {
         private string name;
-        private Hashtable varTable;
+        private Dictionary<string, Operand> varTable;
+        private Dictionary<string, Dictionary<string, string>> typeTable;
         private AssemblyGen ag;
         private StaticFactory st;
         private ExpressionFactory exp;
@@ -23,7 +24,8 @@ namespace Zodiac {
         private TypeGen IOClass;
 
         public CodeGenerator() {
-            varTable = new Hashtable();
+            varTable = new Dictionary<string, Operand>();
+            typeTable = new Dictionary<string, Dictionary<string, string>>();
             name = "ZodiacConsole";
             string exeDir = string.Empty;
             string exeFilePath = string.Empty;
@@ -63,6 +65,7 @@ namespace Zodiac {
             if (parseTree == null) return;
 
             defaultClass = ag.Public.Class("Default");
+            typeTable["Default"] = new Dictionary<string, string>();
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
             initIO();
             // initTypeMethod();
@@ -141,32 +144,72 @@ namespace Zodiac {
             //
         }
 
-        private void FunctionDefinition(ParseTreeNode node, TypeGen masterClass = null)
+        private void FunctionDefinition(ParseTreeNode node, TypeGen ownerType = null)
         {
-            if (masterClass == null) masterClass = defaultClass;
+            if (ownerType == null) ownerType = defaultClass;
             var isStatic = false;
             if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
-            var retNode = node.ChildNodes[2];
 
-            var para1 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[0].Token.Text;
-            var para2 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[1].ChildNodes[0].Token.Text;
+
+            var retNode = node.ChildNodes[2].ChildNodes[0].ChildNodes[0];
+            string retType = getRetType(retNode);
             
-            CodeGen func;
+                     
+            //var retTypeList = new ArrayList();
+            //int retSize = retNode.ChildNodes.Count;
+            Type funcRetType = getType(retType);
+
+            typeTable[ownerType.Name][funcIdt] = "1";
+
+            MethodGen func;
             if (isStatic)
-                func = masterClass.Public.Static.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
+                func = ownerType.Public.Static.Method(funcRetType, funcIdt);
             else
-                func = masterClass.Public.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
+                func = ownerType.Public.Method(funcRetType, funcIdt);
 
-            Operand a = func.Arg(para1);
-            Operand b = func.Arg(para2);
-            Operand ret = func.Local(typeof(ArrayList), exp.New(typeof(ArrayList)));
-            func.Invoke(ret, "Add", a);
-            func.Invoke(ret, "Add", b);
-            
-            func.Return(ret);
+            var paraNode = node.ChildNodes[3].ChildNodes[0].ChildNodes[0];
+            int paraSize = paraNode.ChildNodes.Count;
+            var paras = new List<string>();
+            for(int i = 0; i < paraSize; i++)
+            {
+                paras.Add(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[0].Token.Text);
+                func = func.Parameter(typeof(int), (string)paras[i]);
+            }
+
+            CodeGen code = func;
+            var statementsNode = node.ChildNodes[3].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[0];
+            //int statementSize = statementsNode.ChildNodes.Count;
+            foreach(ParseTreeNode statementNode in statementsNode.ChildNodes)
+            {
+
+            }
+            Operand a = code.Arg(paras[0]);
+            Operand b = code.Arg(paras[1]);
+            Operand ret = code.Local(typeof(ArrayList), exp.New(typeof(ArrayList)));
+            code.Invoke(ret, "Add", a);
+            code.Invoke(ret, "Add", b);
+
+            code.Return(ret);
         }
 
+        private string getRetType(ParseTreeNode node)
+        {
+            if (node.ToString() == "required_type")
+            {
+                node = node.ChildNodes[0];
+                if (node.ToString() == "simple_type")
+                {
+                    return node.ChildNodes[0].Token.Text;
+                }
+            }
+            return null;
+        }
+
+        private Type getType(string str)
+        {
+            return typeof(int);
+        }
 
 
         private Operand Expression(ParseTreeNode node) {
