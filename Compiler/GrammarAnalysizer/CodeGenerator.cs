@@ -72,8 +72,8 @@ namespace Zodiac {
             AddParseNodeRec(parseTree.Root);
 
             var IOvar = mainMethod.Local(exp.New(IOClass));
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["i"]);
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["j"]);
+            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["a"]);
+            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["b"]);
 
             //GenHello1(ag,parseTree);
 
@@ -88,12 +88,10 @@ namespace Zodiac {
             switch (bnf) {
                 case BNF.variable_definition:
                     VariableDefinition(node);
-                    break;
-
-                case BNF.member_access:
-                    // memberAccess(node);
-                    break;
-
+                    return;
+                case BNF.function_definition:
+                    FunctionDefinition(node);
+                    return;
                 default:
                     break;
             }
@@ -114,18 +112,64 @@ namespace Zodiac {
             var idtIter = idtList.GetEnumerator();
             var expIter = expList.GetEnumerator();
 
-            while (idtIter.MoveNext() && expIter.MoveNext()) {
-                var ExpressionNode = expIter.Current as ParseTreeNode;
-                string name = (idtIter.Current as ParseTreeNode).Token.Text;
-                varTable.Add(name, Expression(ExpressionNode));
+            if(idtList.Count == expList.Count)
+            {
+                while (idtIter.MoveNext() && expIter.MoveNext())
+                {
+                    var ExpressionNode = expIter.Current as ParseTreeNode;
+                    string name = (idtIter.Current as ParseTreeNode).Token.Text;
+                    varTable.Add(name, Expression(ExpressionNode));
+                }
             }
+            else
+            {
+                ContextualOperand ret = mainMethod.Local(typeof(ArrayList));
+                mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(Operand)varTable["i"], (Operand)varTable["j"]));
+                Operand a = mainMethod.Local(typeof(int));
+                Operand b = mainMethod.Local(typeof(int));
+                
+                mainMethod.Assign(a, ret[0].Cast(typeof(int)));
+                mainMethod.Assign(b, ret[1].Cast(typeof(int)));
+                varTable.Add("a", a);
+                varTable.Add("b", b);
+
+            }
+
             //expression_list
             // node identifierList =
             return;
             //
         }
 
-        private ContextualOperand Expression(ParseTreeNode node) {
+        private void FunctionDefinition(ParseTreeNode node, TypeGen masterClass = null)
+        {
+            if (masterClass == null) masterClass = defaultClass;
+            var isStatic = false;
+            if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
+            var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
+            var retNode = node.ChildNodes[2];
+
+            var para1 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[0].Token.Text;
+            var para2 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[1].ChildNodes[0].Token.Text;
+            
+            CodeGen func;
+            if (isStatic)
+                func = masterClass.Public.Static.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
+            else
+                func = masterClass.Public.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
+
+            Operand a = func.Arg(para1);
+            Operand b = func.Arg(para2);
+            Operand ret = func.Local(typeof(ArrayList), exp.New(typeof(ArrayList)));
+            func.Invoke(ret, "Add", a);
+            func.Invoke(ret, "Add", b);
+            
+            func.Return(ret);
+        }
+
+
+
+        private Operand Expression(ParseTreeNode node) {
             if (node == null) return null;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
             switch (bnf) {
@@ -242,7 +286,9 @@ namespace Zodiac {
             access_statement,
             argument_list_par,
             argument_list_opt,
-            argument_list
+            argument_list,
+
+            function_definition
         }
     }
 }
