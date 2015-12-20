@@ -10,8 +10,8 @@ namespace Zodiac
             GrammarAnalysizer grammarAnalysizer = new GrammarAnalysizer();
             CodeGenerator codeGenerator = new CodeGenerator();
 
-            //string code = "var i,console = long(1*1+1), IO; console.write(i+1);";
-            string code = " var i = long(1); ";
+            //string code = "var i,console = long(1*1+1), IO; console.Write(i+1);";
+            string code = " var a = 1; ";
             //string code = "static func getAB : long { param a = long; param b = long; return a,b;} var i = 2; var j = 3; var a, b = getAB();";
             grammarAnalysizer.ParseSample(code);
             //grammarAnalysizer.ShowParseTree();

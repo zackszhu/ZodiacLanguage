@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using GrammarAnalysizer;
 using TriAxis.RunSharp;
 using TryAxis.RunSharp;
 
@@ -39,7 +40,7 @@ namespace Zodiac {
 
         public void InitIO() {
             IOClass = ag.Public.Class("IO");
-            CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
+            CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "Write")
                 .Parameter(typeof(string), "arg");
             {
                 var arg = writeStrMethod.Arg("arg");
@@ -47,7 +48,7 @@ namespace Zodiac {
                 writeStrMethod.WriteLine(arg);
             }
 
-            CodeGen writeIntMethod = IOClass.Public.Method(typeof(void), "write")
+            CodeGen writeIntMethod = IOClass.Public.Method(typeof(void), "Write")
              .Parameter(typeof(int), "arg");
             {
                 var arg = writeIntMethod.Arg("arg");
@@ -68,13 +69,17 @@ namespace Zodiac {
             InitIO();
             // InitTypeMethod();
 
-            //mainMethod.Invoke(IOvar, "write", str);
+            //mainMethod.Invoke(IOvar, "Write", str);
 
             AddParseNodeRec(parseTree.Root);
 
-            var IOVar = mainMethod.Local(exp.New(IOClass));
-            mainMethod.Invoke(IOVar, "write", (ContextualOperand)varTable["a"]);
-            mainMethod.Invoke(IOVar, "write", (ContextualOperand)varTable["b"]);
+            //            var IOVar = mainMethod.Local(exp.New(IOClass));
+            //            var tmp = varTable["a"];
+            //            Console.Write((Operand)tmp);
+            //            mainMethod.Invoke(IOVar, "Write", (ContextualOperand)varTable["a"]);
+            //            mainMethod.Invoke(IOVar, "Write", (ContextualOperand)varTable["b"]);
+            ITypeMapper TypeMapper = ag.TypeMapper;
+            mainMethod.Invoke(TypeMapper.MapType(typeof(IO)), "WriteLine", (ContextualOperand)varTable["a"]);
 
             //GenHello1(ag,parseTree);
 
