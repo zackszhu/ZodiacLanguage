@@ -11,21 +11,36 @@ using TriAxis.RunSharp;
 using TryAxis.RunSharp;
 
 namespace Zodiac {
+    public enum Ztype { zlong = 0, zbool, zreal, zlist, zType }
+    class ZOperand
+    {
+
+        public ZOperand(Operand oper, Ztype z) {
+            operand = oper;
+            ztype = z;
+        }
+
+        public Operand operand;
+        public Ztype ztype;
+    }
+
 
     internal class CodeGenerator {
         private string name;
-        private Dictionary<string, Operand> varTable;
-        private Dictionary<string, Dictionary<string, string>> typeTable;
+        private Dictionary<string, ZOperand> varTable;
+        private Dictionary<string, Dictionary<string, Type>> typeTable;
         private AssemblyGen ag;
         private StaticFactory st;
         private ExpressionFactory exp;
         private TypeGen defaultClass;
         private CodeGen mainMethod;
         private TypeGen IOClass;
+        private Operand IOvar;
+
 
         public CodeGenerator() {
-            varTable = new Dictionary<string, Operand>();
-            typeTable = new Dictionary<string, Dictionary<string, string>>();
+            varTable = new Dictionary<string, ZOperand>();
+            typeTable = new Dictionary<string, Dictionary<string, Type>>();
             name = "ZodiacConsole";
             string exeDir = string.Empty;
             string exeFilePath = string.Empty;
@@ -65,20 +80,17 @@ namespace Zodiac {
             if (parseTree == null) return;
 
             defaultClass = ag.Public.Class("Default");
-            typeTable["Default"] = new Dictionary<string, string>();
+            typeTable["Default"] = new Dictionary<string, Type>();
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
             initIO();
-            // initTypeMethod();
 
-            //mainMethod.Invoke(IOvar, "write", str);
 
             AddParseNodeRec(parseTree.Root);
 
-            var IOvar = mainMethod.Local(exp.New(IOClass));
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["a"]);
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["b"]);
 
-            //GenHello1(ag,parseTree);
+            IOvar = mainMethod.Local(exp.New(IOClass));
+            mainMethod.Invoke(IOvar, "write", varTable["i"].operand);
+            mainMethod.Invoke(IOvar, "write", varTable["j"].operand);
 
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
@@ -102,9 +114,10 @@ namespace Zodiac {
                 AddParseNodeRec(child);
         }
 
-        private void VariableDefinition(ParseTreeNode node) {
+        private void VariableDefinition(ParseTreeNode node , CodeGen ownerScope = null) {
             //ParseTreeNodeList childList = node.ChildNodes;
             //get variable name
+            if (ownerScope == null) ownerScope = mainMethod;
 
             var nameList = new List<string>();
 
@@ -126,15 +139,16 @@ namespace Zodiac {
             }
             else
             {
-                ContextualOperand ret = mainMethod.Local(typeof(ArrayList));
-                mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(Operand)varTable["i"], (Operand)varTable["j"]));
-                Operand a = mainMethod.Local(typeof(int));
+                //for multiRturn
+                ContextualOperand ret = mainMethod.Local(typeof(int));
+                mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(varTable["i"] as ZOperand).operand , (varTable["j"] as ZOperand).operand));
+                ContextualOperand a = mainMethod.Local(typeof(int));
                 Operand b = mainMethod.Local(typeof(int));
+                
+                //b = a.Ref();
                 
                 mainMethod.Assign(a, ret[0].Cast(typeof(int)));
                 mainMethod.Assign(b, ret[1].Cast(typeof(int)));
-                varTable.Add("a", a);
-                varTable.Add("b", b);
 
             }
 
@@ -151,7 +165,7 @@ namespace Zodiac {
             if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
 
-
+            
             var retNode = node.ChildNodes[2].ChildNodes[0].ChildNodes[0];
             string retType = getRetType(retNode);
             
@@ -160,7 +174,7 @@ namespace Zodiac {
             //int retSize = retNode.ChildNodes.Count;
             Type funcRetType = getType(retType);
 
-            typeTable[ownerType.Name][funcIdt] = "1";
+            typeTable[ownerType.Name][funcIdt] = funcRetType;
 
             MethodGen func;
             if (isStatic)
@@ -186,13 +200,11 @@ namespace Zodiac {
             }
             Operand a = code.Arg(paras[0]);
             Operand b = code.Arg(paras[1]);
-            Operand ret = code.Local(typeof(ArrayList), exp.New(typeof(ArrayList)));
-            code.Invoke(ret, "Add", a);
-            code.Invoke(ret, "Add", b);
+            Operand ret = code.Local(typeof(int), a);
 
             code.Return(ret);
         }
-
+            
         private string getRetType(ParseTreeNode node)
         {
             if (node.ToString() == "required_type")
@@ -212,12 +224,15 @@ namespace Zodiac {
         }
 
 
-        private Operand Expression(ParseTreeNode node) {
-            if (node == null) return null;
+        private ZOperand Expression(ParseTreeNode node ,CodeGen ownerScope = null )
+        {
+            if (ownerScope == null) ownerScope = mainMethod;
+            if (node == null ) return null;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
             switch (bnf) {
                 case BNF.number:
-                    return mainMethod.Local(typeof(int), int.Parse(node.Token.Text));
+                   
+                    return new ZOperand(ownerScope.Local(typeof(int), int.Parse(node.Token.Text)),Ztype.zlong);
 
                 case BNF.member_access:
                     return MemberAccess(node);
@@ -225,14 +240,17 @@ namespace Zodiac {
                 default:
                     //@TODO
                     if (node.ChildNodes.Count == 3)
-                        return Expression(node.ChildNodes[0]).Add(Expression(node.ChildNodes[2]));
+                    {
+                        return new ZOperand(Expression(node.ChildNodes[0]).operand.Add(Expression(node.ChildNodes[2]).operand),Ztype.zlong);
+
+                    }
                     //return mainMethod.AssignAdd(Expression(node.ChildNodes[0]), Expression(node.ChildNodes[2])) );
                     break;
             }
             return Expression(node.ChildNodes[0]);
         }
 
-        private ContextualOperand MemberAccess(ParseTreeNode node) {
+        private ZOperand MemberAccess(ParseTreeNode node) {
             return null;
             /*
             if (node == null) return null;
@@ -279,6 +297,7 @@ namespace Zodiac {
             Operand str = main.Local(typeof(string));
 
             ITypeMapper TypeMapper = ag.TypeMapper;
+            
             var staticF = ag.StaticFactory;
             //main.Assign(str, staticF.Invoke(TypeMapper.MapType(typeof(Console)), "ReadLine"));
             //main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", str);
