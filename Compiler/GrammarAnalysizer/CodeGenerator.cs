@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -25,18 +26,18 @@ namespace Zodiac {
         public CodeGenerator() {
             varTable = new Hashtable();
             name = "ZodiacConsole";
-            string exeDir = string.Empty;
-            string exeFilePath = string.Empty;
-            exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            exeFilePath = Path.Combine(exeDir, name + ".exe");
-            Directory.CreateDirectory(exeDir);
-            //Console.WriteLine(exeFilePath);
-            ag = new AssemblyGen(name, new CompilerOptions() { OutputPath = exeFilePath });
+            var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (exeDir != null) {
+                var exeFilePath = Path.Combine(exeDir, name + ".exe");
+                Directory.CreateDirectory(exeDir);
+                //Console.WriteLine(exeFilePath);
+                ag = new AssemblyGen(name, new CompilerOptions() { OutputPath = exeFilePath });
+            }
             st = ag.StaticFactory;
             exp = ag.ExpressionFactory;
         }
 
-        public void initIO() {
+        public void InitIO() {
             IOClass = ag.Public.Class("IO");
             CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
                 .Parameter(typeof(string), "arg");
@@ -55,7 +56,7 @@ namespace Zodiac {
             }
         }
 
-        private void initTypeMethod() {
+        private void InitTypeMethod() {
             // take long as a method
         }
 
@@ -64,16 +65,16 @@ namespace Zodiac {
 
             defaultClass = ag.Public.Class("Default");
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
-            initIO();
-            // initTypeMethod();
+            InitIO();
+            // InitTypeMethod();
 
             //mainMethod.Invoke(IOvar, "write", str);
 
             AddParseNodeRec(parseTree.Root);
 
-            var IOvar = mainMethod.Local(exp.New(IOClass));
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["a"]);
-            mainMethod.Invoke(IOvar, "write", (ContextualOperand)varTable["b"]);
+            var IOVar = mainMethod.Local(exp.New(IOClass));
+            mainMethod.Invoke(IOVar, "write", (ContextualOperand)varTable["a"]);
+            mainMethod.Invoke(IOVar, "write", (ContextualOperand)varTable["b"]);
 
             //GenHello1(ag,parseTree);
 
@@ -83,8 +84,8 @@ namespace Zodiac {
 
         private void AddParseNodeRec(ParseTreeNode node) {
             if (node == null) return;
-            BnfTerm term = node.Term;
-            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+            var term = node.Term;
+            var bnf = GetBNF(node.Token?.Terminal.ToString() ?? node.Term.Name);
             switch (bnf) {
                 case BNF.variable_definition:
                     VariableDefinition(node);
@@ -116,14 +117,15 @@ namespace Zodiac {
             {
                 while (idtIter.MoveNext() && expIter.MoveNext())
                 {
-                    var ExpressionNode = expIter.Current as ParseTreeNode;
-                    string name = (idtIter.Current as ParseTreeNode).Token.Text;
-                    varTable.Add(name, Expression(ExpressionNode));
+                    var expressionNode = expIter.Current as ParseTreeNode;
+                    var varName = (idtIter.Current as ParseTreeNode)?.Token.Text;
+                    Debug.Assert(varName != null, "varName != null");
+                    varTable.Add(varName, Expression(expressionNode));
                 }
             }
             else
             {
-                ContextualOperand ret = mainMethod.Local(typeof(ArrayList));
+                var ret = mainMethod.Local(typeof(ArrayList));
                 mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(Operand)varTable["i"], (Operand)varTable["j"]));
                 Operand a = mainMethod.Local(typeof(int));
                 Operand b = mainMethod.Local(typeof(int));
@@ -144,19 +146,14 @@ namespace Zodiac {
         private void FunctionDefinition(ParseTreeNode node, TypeGen masterClass = null)
         {
             if (masterClass == null) masterClass = defaultClass;
-            var isStatic = false;
-            if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
+            var isStatic = node.ChildNodes[0].ChildNodes.Count != 0;
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
             var retNode = node.ChildNodes[2];
 
             var para1 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[0].Token.Text;
             var para2 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[1].ChildNodes[0].Token.Text;
-            
-            CodeGen func;
-            if (isStatic)
-                func = masterClass.Public.Static.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
-            else
-                func = masterClass.Public.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
+
+            CodeGen func = isStatic ? masterClass.Public.Static.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2) : masterClass.Public.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
 
             Operand a = func.Arg(para1);
             Operand b = func.Arg(para2);
@@ -171,7 +168,7 @@ namespace Zodiac {
 
         private Operand Expression(ParseTreeNode node) {
             if (node == null) return null;
-            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+            var bnf = GetBNF(node.Token?.Terminal.ToString() ?? node.Term.Name);
             switch (bnf) {
                 case BNF.number:
                     return mainMethod.Local(typeof(int), int.Parse(node.Token.Text));
@@ -247,10 +244,10 @@ namespace Zodiac {
             }
         }
 
-        private BNF GetBNF(string BNFString) {
+        private BNF GetBNF(string bnfString) {
             BNF bnf;
             try {
-                bnf = (BNF)Enum.Parse(typeof(BNF), BNFString);
+                bnf = (BNF)Enum.Parse(typeof(BNF), bnfString);
             }
             catch (Exception e) {
                 //for identifier like "1 <identifier>",then mannally set bnf = identifier
