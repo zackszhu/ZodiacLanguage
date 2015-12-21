@@ -27,7 +27,8 @@ namespace Zodiac {
 
     internal class CodeGenerator {
         private string name;
-        private Hashtable varTable;  // < string, >
+        private Dictionary<string, ZOperand> varTable;
+        private Dictionary<string, Dictionary<string, Type>> typeTable;
         private Stack<TypeGen> typeStack;
         private Stack<CodeGen> funcStack;
         private AssemblyGen ag;
@@ -40,10 +41,10 @@ namespace Zodiac {
 
 
         public CodeGenerator() {
-            varTable = new Hashtable();
+            varTable = new Dictionary<string, ZOperand>();
+            typeTable = new Dictionary<string, Dictionary<string, Type>>();
             typeStack = new Stack<TypeGen>();
             funcStack = new Stack<CodeGen>();
-
             name = "ZodiacConsole";
             string exeDir = string.Empty;
             string exeFilePath = string.Empty;
@@ -73,8 +74,6 @@ namespace Zodiac {
                 writeIntMethod.Local();
                 writeIntMethod.WriteLine(arg);
             }
-
-            IOvar = mainMethod.Local(exp.New(IOClass));
         }
 
         private void initTypeMethod() {
@@ -87,6 +86,7 @@ namespace Zodiac {
            
 
             defaultClass = ag.Public.Class("Default");
+            typeTable["Default"] = new Dictionary<string, Type>();
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
             
             //generator stack
@@ -99,9 +99,9 @@ namespace Zodiac {
             AddParseNodeRec(parseTree.Root);
 
            
-
-            mainMethod.Invoke(IOvar, "write", (Operand)varTable["a"]);
-            mainMethod.Invoke(IOvar, "write", (Operand)varTable["b"]);
+            IOvar = mainMethod.Local(exp.New(IOClass));
+            mainMethod.Invoke(IOvar, "write", varTable["i"].operand); //TODO
+            mainMethod.Invoke(IOvar, "write", varTable["j"].operand);  //TODO
 
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
@@ -211,18 +211,16 @@ namespace Zodiac {
             }
             else
             {
-                ContextualOperand ret = mainMethod.Local(typeof(ArrayList));
+                //for multiRturn
+                ContextualOperand ret = mainMethod.Local(typeof(int));
                 mainMethod.Assign(ret, ag.StaticFactory.Invoke(defaultClass,"getAB",(varTable["i"] as ZOperand).operand , (varTable["j"] as ZOperand).operand));
                 ContextualOperand a = mainMethod.Local(typeof(int));
                 Operand b = mainMethod.Local(typeof(int));
 
                 //b = a.Ref();
                 
-
                 mainMethod.Assign(a, ret[0].Cast(typeof(int)));
                 mainMethod.Assign(b, ret[1].Cast(typeof(int)));
-                varTable.Add("a", a);
-                varTable.Add("b", b);
 
             }
 
@@ -239,30 +237,58 @@ namespace Zodiac {
             var isStatic = false;
             if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
-            var retNode = node.ChildNodes[2];
 
-            var para1 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[0].Token.Text;
-            var para2 = node.ChildNodes[3].ChildNodes[0].ChildNodes[0].ChildNodes[1].ChildNodes[1].ChildNodes[0].Token.Text;
             
-            CodeGen func;
+            var retNode = node.ChildNodes[2].ChildNodes[0].ChildNodes[0];
+            string retType = getRetType(retNode);
+
+
+            //var retTypeList = new ArrayList();
+            //int retSize = retNode.ChildNodes.Count;
+            Type funcRetType = getType(retType);
+            
+            typeTable[ownerType.Name][funcIdt] = funcRetType;
+
+            MethodGen func;
             if (isStatic)
-                func = masterClass.Public.Static.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
+                func = ownerType.Public.Static.Method(funcRetType, funcIdt);
             else
-                func = masterClass.Public.Method(typeof(ArrayList), funcIdt).Parameter(typeof(int), para1).Parameter(typeof(int), para2);
-
-            Operand a = func.Arg(para1);
-
+                func = ownerType.Public.Method(funcRetType, funcIdt);
             
-
-            
+            var paraNode = node.ChildNodes[3].ChildNodes[0].ChildNodes[0];
+            int paraSize = paraNode.ChildNodes.Count;
+            var paras = new List<string>();
+            for(int i = 0; i < paraSize; i++)
+            {
+                paras.Add(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[0].Token.Text);
+                func = func.Parameter(typeof(int), (string)paras[i]);
+            }
   
-            Operand b = func.Arg(para2);
-            Operand ret = func.Local(typeof(ArrayList), exp.New(typeof(ArrayList)));
-            func.Invoke(ret, "Add", a);
-            func.Invoke(ret, "Add", b);
-            
+            CodeGen code = func;
+            var statementsNode = node.ChildNodes[3].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[0];
+            //int statementSize = statementsNode.ChildNodes.Count;
+            foreach(ParseTreeNode statementNode in statementsNode.ChildNodes)
+            {
 
-            func.Return(ret);
+            }
+            Operand a = code.Arg(paras[0]);
+            Operand b = code.Arg(paras[1]);
+            Operand ret = code.Local(typeof(int), a);
+            
+            code.Return(ret);
+        }
+
+        private string getRetType(ParseTreeNode node)
+        {
+            if (node.ToString() == "required_type")
+            {
+                node = node.ChildNodes[0];
+                if (node.ToString() == "simple_type")
+                {
+                    return node.ChildNodes[0].Token.Text;
+                }
+            }
+            return null;
         }
 
         private void AssignmentStatement(ParseTreeNode node)
@@ -351,8 +377,8 @@ namespace Zodiac {
 
             return null;*/
         }
-       
         
+            
         private BNF GetBNF(string BNFString) {
             BNF bnf;
             try {
