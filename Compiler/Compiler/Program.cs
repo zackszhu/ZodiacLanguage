@@ -162,7 +162,6 @@ namespace Compiler {
             var else_part = new NonTerminal("else_part");
             var while_statement = new NonTerminal("while_statement");
             var for_statement = new NonTerminal("for_statement");
-            var loop_statement = new NonTerminal("loop_statement");
             var break_statement = new NonTerminal("break_statement");
             var continue_statement = new NonTerminal("continue_statement");
             var ret_statement = new NonTerminal("ret_statement");
@@ -176,6 +175,12 @@ namespace Compiler {
             var statement_list = new NonTerminal("statement_list");
             //var declaration = new NonTerminal("declaration");
             var definition = new NonTerminal("definition");
+            
+            var main_scope_body_opt = new NonTerminal("scope_body_opt");
+            var main_scope_body = new NonTerminal("scope_body");
+            var main_statement_list = new NonTerminal("statement_list");
+            var main_statement = new NonTerminal("statement");
+
 
             /* 11 Programs */
             var program = new NonTerminal("program");
@@ -373,14 +378,13 @@ namespace Compiler {
                 scope |
                 simple_statement |
                 structed_statement |
-                loop_statement |
-                ret_statement;
+                ret_statement |
+                break_statement |
+                continue_statement;
             /* 8.2 Simple-statements */
-            simple_statement.Rule = assignment_statement | variable_definition_statement | function_definition /*| function_declaration */| type_definition | access_statement;
-
+            simple_statement.Rule = assignment_statement | variable_definition_statement | access_statement;
             variable_definition_statement.Rule = variable_definition + semi;
             assignment_statement.Rule = member_access_list + assignment_operator + expression_list + semi;
-
             access_statement.Rule = member_access + semi;
 
             /* 8.3 Structed-statements */
@@ -391,7 +395,6 @@ namespace Compiler {
             while_statement.Rule = ToTerm("while") + Lpar + expression + Rpar + scope;
             for_statement.Rule = ToTerm("for") + identifier + "in" + member_access + scope;
             /* 8.4 Loop-statements */
-            loop_statement.Rule = break_statement | continue_statement;
             break_statement.Rule = "break" + semi;
             continue_statement.Rule = "continue" + semi;
             /* 8.5 Ret-statements */
@@ -399,6 +402,12 @@ namespace Compiler {
             return_statement.Rule = ToTerm("return") + argument_list_opt + semi;
             escape_statement.Rule = ToTerm("escape") + identifier_list + semi;
 
+
+
+            main_statement.Rule = scope | simple_statement | structed_statement | definition;
+            main_scope_body_opt.Rule = main_scope_body | Empty;
+            main_scope_body.Rule = main_statement_list;
+            main_statement_list.Rule = MakePlusRule(main_statement_list, null, main_statement);
             /* 9 Scope */
             scope.Rule = Lbr + scope_body_opt + Rbr;
             scope_body_opt.Rule = scope_body | Empty;
@@ -410,7 +419,7 @@ namespace Compiler {
             definition.Rule = function_definition | type_definition;
 
             /* 11 Program */
-            program.Rule = program_heading + scope_body;
+            program.Rule = program_heading + main_scope_body_opt;
             program_heading.Rule = have_sequence_list | Empty;
             have_sequence_list.Rule = MakePlusRule(have_sequence_list, comma, have_sequence);
             have_sequence.Rule = ToTerm("have") + identifier + ".d";

@@ -49,15 +49,16 @@ namespace Zodiac {
             funcStack = new Stack<CodeGen>();
             name = "ZodiacConsole";
             var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (exeDir != null) {
+            if (exeDir != null)
+            {
                 var exeFilePath = Path.Combine(exeDir, name + ".exe");
                 Directory.CreateDirectory(exeDir);
                 //Console.WriteLine(exeFilePath);
                 ag = new AssemblyGen(name, new CompilerOptions() { OutputPath = exeFilePath });
-            st = ag.StaticFactory;
-            exp = ag.ExpressionFactory;
-            tm = ag.TypeMapper;
-
+                st = ag.StaticFactory;
+                exp = ag.ExpressionFactory;
+                tm = ag.TypeMapper;
+            }
         }
 
         public void InitIO() {
@@ -83,7 +84,7 @@ namespace Zodiac {
             {
                 var arg = writeCharMethod.Arg("arg");
                 writeCharMethod.WriteLine(arg);
-        }
+            }
         }
         public void InitRequiredType()
         {
@@ -110,20 +111,15 @@ namespace Zodiac {
             InitRequiredType();
             AddParseNodeRec(parseTree.Root);
 
-            //            var IOVar = mainMethod.Local(exp.New(IOClass));
-            //            var tmp = varTable["a"];
-            //            Console.Write((Operand)tmp);
-            //            mainMethod.Invoke(IOVar, "Write", (ContextualOperand)varTable["a"]);
-            //            mainMethod.Invoke(IOVar, "Write", (ContextualOperand)varTable["b"]);
-            var TypeMapper = ag.TypeMapper;
-            var a = mainMethod.Local(typeof (List<int>));
-            a.Invoke("Add", 1);
-            var c = a[0].GetReturnType(TypeMapper);
-            mainMethod.Invoke(typeof(IO), "WriteLine", (ContextualOperand)varTable["a"]);
-            mainMethod.Invoke(typeof(IO), "WriteLine", c);
+            //var a = mainMethod.Local(exp.New(typeof (List<int>)));
+            //a.Invoke("Add", 1);
+            //varTable["a"] = new ZOperand(a,"List<int>");
+            //var c = a[0].GetReturnType(tm);
+            //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["a"].operand);
+            //mainMethod.Invoke(typeof(IO), "WriteLine", c);
 
-            //GenHello1(ag,parseTree);
-
+            mainMethod.Invoke(typeof(IO), "WriteLine", varTable["i"].operand);
+            mainMethod.Invoke(typeof(IO), "WriteLine", varTable["j"].operand);
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
         }
@@ -207,15 +203,10 @@ namespace Zodiac {
 
 
         private void VariableDefinition(ParseTreeNode node ) {
-            //ParseTreeNodeList childList = node.ChildNodes;
-            //get variable name
-
             CodeGen ownerFunc = funcStack.Peek();
 
             var nameList = new List<string>();
-
-            // if (node.ChildNodes[0])
-
+            
             var idtList = node.ChildNodes[1].ChildNodes;
             var expList = node.ChildNodes[3].ChildNodes;
             var idtIter = idtList.GetEnumerator();
@@ -253,13 +244,13 @@ namespace Zodiac {
 
         private void FunctionDefinition(ParseTreeNode node)
         {
+            //------------the owner of the fucntion
             TypeGen ownerType = typeStack.Peek();
-
+            //------------function header
             var isStatic = false;
             if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
-
-
+            //------------ret Type
             var retNode = node.ChildNodes[2].ChildNodes[0].ChildNodes[0];
             string retType = getTypeString(retNode);
             //var retTypeList = new ArrayList();
@@ -277,26 +268,26 @@ namespace Zodiac {
 
             var paraNode = node.ChildNodes[3].ChildNodes[0].ChildNodes[0];
             int paraSize = paraNode.ChildNodes.Count;
-            var paras = new List<string>();
+            var paraNames = new List<string>();
+            var paras = new List<Operand>();
             for(int i = 0; i < paraSize; i++)
             {
-                paras.Add(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[0].Token.Text);
+                paraNames.Add(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[0].Token.Text);
                 var typeStr = getTypeString(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[3]);
-                func = func.Parameter(getType(typeStr), paras[i]);
+                func = func.Parameter(getType(typeStr), paraNames[i]);
             }
 
             CodeGen code = func.GetCode();
+            for(int i = 0; i < paraSize; i++)
+            {
+                paras[i] = code.Arg(paraNames[i]);
+            }
             var statementsNode = node.ChildNodes[3].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[0];
             //int statementSize = statementsNode.ChildNodes.Count;
             foreach(ParseTreeNode statementNode in statementsNode.ChildNodes)
             {
 
             }
-            Operand a = code.Arg(paras[0]);
-            Operand b = code.Arg(paras[1]);
-            Operand ret = code.Local(typeof(int), a);
-
-            code.Return(ret);
         }
         private string getTypeString(ParseTreeNode node)
         {
@@ -446,7 +437,6 @@ namespace Zodiac {
             }    
             return MemberAccess(mainAccessNode);
             }
-
         private ZOperand FunctionAccess(ParseTreeNode node)
         {
             CodeGen ownerFunc = funcStack.Peek();
