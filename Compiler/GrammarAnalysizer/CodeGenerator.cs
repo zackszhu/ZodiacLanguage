@@ -78,8 +78,12 @@ namespace Zodiac {
             //            Console.Write((Operand)tmp);
             //            mainMethod.Invoke(IOVar, "Write", (ContextualOperand)varTable["a"]);
             //            mainMethod.Invoke(IOVar, "Write", (ContextualOperand)varTable["b"]);
-            ITypeMapper TypeMapper = ag.TypeMapper;
-            mainMethod.Invoke(TypeMapper.MapType(typeof(IO)), "WriteLine", (ContextualOperand)varTable["a"]);
+            var TypeMapper = ag.TypeMapper;
+            var a = mainMethod.Local(typeof (List<int>));
+            a.Invoke("Add", 1);
+            var c = a[0].GetReturnType(TypeMapper);
+            mainMethod.Invoke(typeof(IO), "WriteLine", (ContextualOperand)varTable["a"]);
+            mainMethod.Invoke(typeof(IO), "WriteLine", c);
 
             //GenHello1(ag,parseTree);
 

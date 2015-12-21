@@ -7,34 +7,64 @@ using System.Threading.Tasks;
 
 namespace GrammarAnalysizer {
     public class MyList {
-        private ArrayList _element = new ArrayList();
+        private ArrayList _elements = new ArrayList();
         private int _offset = 0;
 
-        public int Length => _element.Count;
+        public int Length => _elements.Count;
+
+        public Type ElmtType;
 
         public object this[int index] {
-            get { return _element[index - _offset]; }
-            set { _element[index - _offset] = value; }
+            get { return _elements[index - _offset]; }
+            set { _elements[index - _offset] = value; }
+        }
+
+        public MyList() {
+            _elements = new ArrayList();
+            _offset = 0;
         }
 
         public MyList(int start, int end) {
-            for (int i = start; i < end; i++) {
-                _element.Add(i);
+            for (var i = start; i < end; i++) {
+                _elements.Add(i);
             }
+            ElmtType = typeof (int);
         }
 
         public MyList(int start, int end, object value) {
             _offset = start;
             for (var i = 0; i <= end - start; i++) {
-                _element[i] = value;
+                _elements[i] = value;
             }
+            ElmtType = value.GetType();
         }
 
         public MyList(int start, int end, int startValue, int endValue) {
             _offset = start;
             for (var i = 0; i <= end - start; i++) {
-                _element[i] = startValue + i > endValue ? 0 : startValue + i;
+                _elements[i] = startValue + i > endValue ? 0 : startValue + i;
             }
+            ElmtType = typeof (int);
+        }
+
+        public static MyList operator +(MyList l1, MyList l2) {
+            // @TODO type check
+            var ret = new MyList() {
+                _elements = l1._elements,
+                _offset = l1._offset
+            };
+            ret._elements.AddRange(l2._elements);
+            return ret;
+        }
+
+        public override string ToString() {
+            var str = "[";
+            foreach (var element in _elements) {
+                str += element.ToString();
+                str += ", ";
+            }
+            str += "]";
+            return str;
         }
     }
 }
