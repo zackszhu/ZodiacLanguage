@@ -28,6 +28,8 @@ namespace Zodiac {
     internal class CodeGenerator {
         private string name;
         private Hashtable varTable;  // < string, >
+        private Stack<TypeGen> typeStack;
+        private Stack<CodeGen> funcStack;
         private AssemblyGen ag;
         private StaticFactory st;
         private ExpressionFactory exp;
@@ -39,6 +41,9 @@ namespace Zodiac {
 
         public CodeGenerator() {
             varTable = new Hashtable();
+            typeStack = new Stack<TypeGen>();
+            funcStack = new Stack<CodeGen>();
+
             name = "ZodiacConsole";
             string exeDir = string.Empty;
             string exeFilePath = string.Empty;
@@ -79,8 +84,15 @@ namespace Zodiac {
         public void Generate(ParseTree parseTree) {
             if (parseTree == null) return;
 
+           
+
             defaultClass = ag.Public.Class("Default");
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
+            
+            //generator stack
+            typeStack.Push(defaultClass);
+            funcStack.Push(mainMethod);
+
             initIO();
 
 
@@ -95,28 +107,89 @@ namespace Zodiac {
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
         }
 
-        private void AddParseNodeRec(ParseTreeNode node) {
+
+
+        private void AddParseNodeRec(ParseTreeNode node)
+        {
             if (node == null) return;
-            BnfTerm term = node.Term;
+            //BnfTerm term = node.Term;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
-            switch (bnf) {
+            switch (bnf)
+            {
+                case BNF.program_heading:
+                    //VariableDefinition(node);
+                    return;
+                case BNF.scope_body:
+                    ScopeBody(node);
+                    return;
+               
+                default:
+                    break;
+            }
+
+            foreach (var child in node.ChildNodes)
+                AddParseNodeRec(child);
+        }
+
+
+
+        private void ScopeBody(ParseTreeNode node)
+        {
+            if (node == null) return;
+            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+            switch (bnf)
+            {
+                case BNF.simple_statement:
+                    simple_statement(node);
+                    return;
+                case BNF.structed_statement:
+                    StructedStatement(node);
+                    return;
+
+                default:
+                    break;
+            }
+
+            foreach (var child in node.ChildNodes)
+                ScopeBody(child);
+        }
+
+        private void simple_statement(ParseTreeNode node)
+        {
+            if (node == null) return;
+            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+            switch (bnf)
+            {
                 case BNF.variable_definition:
                     VariableDefinition(node);
                     return;
                 case BNF.function_definition:
                     FunctionDefinition(node);
                     return;
+                case BNF.assignment_statement:
+                    AssignmentStatement(node);
+                    return;
+                case BNF.type_definition:
+                    TypeDefinition(node);
+                    return;
+                case BNF.access_statement:
+                    AccessStatement(node);
+                    return;
                 default:
                     break;
             }
+
             foreach (var child in node.ChildNodes)
-                AddParseNodeRec(child);
+                simple_statement(child);
+
         }
 
-        private void VariableDefinition(ParseTreeNode node , CodeGen ownerScope = null) {
+
+        private void VariableDefinition(ParseTreeNode node ) {
             //ParseTreeNodeList childList = node.ChildNodes;
             //get variable name
-            if (ownerScope == null) ownerScope = mainMethod;
+
+            CodeGen ownerFunc = funcStack.Peek();
 
             var nameList = new List<string>();
 
@@ -159,9 +232,10 @@ namespace Zodiac {
             //
         }
 
-        private void FunctionDefinition(ParseTreeNode node, TypeGen masterClass = null)
+        private void FunctionDefinition(ParseTreeNode node)
         {
-            if (masterClass == null) masterClass = defaultClass;
+            TypeGen masterClass = typeStack.Peek();
+
             var isStatic = false;
             if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
@@ -191,17 +265,35 @@ namespace Zodiac {
             func.Return(ret);
         }
 
-
-
-        private ZOperand Expression(ParseTreeNode node ,CodeGen ownerScope = null )
+        private void AssignmentStatement(ParseTreeNode node)
         {
-            if (ownerScope == null) ownerScope = mainMethod;
+            throw new NotImplementedException();
+        }
+
+        private void TypeDefinition(ParseTreeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void AccessStatement(ParseTreeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void StructedStatement(ParseTreeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        private ZOperand Expression(ParseTreeNode node)
+        {
+            CodeGen ownerFunc = funcStack.Peek();
             if (node == null ) return null;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
             switch (bnf) {
                 case BNF.number:
                    
-                    return new ZOperand(ownerScope.Local(typeof(int), int.Parse(node.Token.Text)),Ztype.zlong);
+                    return new ZOperand(ownerFunc.Local(typeof(int), int.Parse(node.Token.Text)),Ztype.zlong);
 
                 case BNF.member_access:
                     return MemberAccess(node);
@@ -259,24 +351,7 @@ namespace Zodiac {
 
             return null;*/
         }
-        
-        public void GenHello1(AssemblyGen ag, ParseTree ParseTree) {
-            TypeGen Hello1 = ag.Public.Class("Main");
-            CodeGen main = Hello1.Public.Static.Method(typeof(void), "Main");
-            Operand str = main.Local(typeof(string));
-
-            ITypeMapper TypeMapper = ag.TypeMapper;
-            
-            var staticF = ag.StaticFactory;
-            //main.Assign(str, staticF.Invoke(TypeMapper.MapType(typeof(Console)), "ReadLine"));
-            //main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", str);
-            if (Console.ReadLine() == "111") {
-                main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", "111");
-            }
-            else {
-                main.Invoke(TypeMapper.MapType(typeof(Console)), "WriteLine", "222");
-            }
-        }
+       
         
         private BNF GetBNF(string BNFString) {
             BNF bnf;
@@ -290,14 +365,25 @@ namespace Zodiac {
             return bnf;
         }
 
+
+
+
+
+
+
+
+
         private enum BNF {
             program = 0,
             program_heading,
             scope_body,
             statement_list,
             simple_statement,
+            structed_statement,
             variable_definition_statement,
             variable_definition,
+            type_definition,
+            assignment_statement,
             Keyword,
             identifier_list,
             identifier,
