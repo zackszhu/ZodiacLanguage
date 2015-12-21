@@ -14,14 +14,14 @@ using TryAxis.RunSharp;
 namespace Zodiac {
     class ZOperand
     {
-
-        public ZOperand(Operand oper, string t, string n = null) {
+        public ZOperand(ContextualOperand oper, string t , string n = null)
+        {
             operand = oper;
             type = t;
             name = n;
         }
 
-        public Operand operand;
+        public ContextualOperand operand;
         public string type;
         public string name;
     }
@@ -39,14 +39,17 @@ namespace Zodiac {
         private ExpressionFactory exp;
         private TypeGen defaultClass;
         private CodeGen mainMethod;
-        private TypeGen IOClass;
+        //private TypeGen IOClass;
 
+        private int lineNumber;
+        private int columnNumber;
 
         public CodeGenerator() {
             varTable = new Dictionary<string, ZOperand>();
             typeTable = new Dictionary<string, Dictionary<string, Type>>();
             typeStack = new Stack<TypeGen>();
             funcStack = new Stack<CodeGen>();
+
             name = "ZodiacConsole";
             var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (exeDir != null)
@@ -60,11 +63,12 @@ namespace Zodiac {
                 tm = ag.TypeMapper;
             }
         }
-
+        /*
         public void InitIO() {
             IOClass = ag.Public.Class("IO");
             typeTable["IO"] = new Dictionary<string, Type>();
             typeTable["IO"]["write"] = typeof(void);
+
             CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
                 .Parameter(typeof(string), "arg");
             {
@@ -86,6 +90,8 @@ namespace Zodiac {
                 writeCharMethod.WriteLine(arg);
             }
         }
+        */
+
         public void InitRequiredType()
         {
             typeTable["long"] = new Dictionary<string, Type>();
@@ -107,16 +113,26 @@ namespace Zodiac {
             typeStack.Push(defaultClass);
             funcStack.Push(mainMethod);
 
-            InitIO();
+           // InitIO();
             InitRequiredType();
             AddParseNodeRec(parseTree.Root);
 
-            //var a = mainMethod.Local(exp.New(typeof (List<int>)));
-            //a.Invoke("Add", 1);
+            ContextualOperand a = mainMethod.Local(exp.New(typeof (ArrayList)));
+            a.Invoke("Add", 2);
+
+
             //varTable["a"] = new ZOperand(a,"List<int>");
-            //var c = a[0].GetReturnType(tm);
+
+            //var c = (a[0] as ContextualOperand).GetReturnType(tm);
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["a"].operand);
             //mainMethod.Invoke(typeof(IO), "WriteLine", c);
+
+
+
+            var t = varTable["i"].operand.GetReturnType(tm);
+            var s = varTable["j"].operand.GetReturnType(tm);
+            mainMethod.Invoke(typeof(IO), "WriteLine", t);
+            mainMethod.Invoke(typeof(IO), "WriteLine", s);
 
             mainMethod.Invoke(typeof(IO), "WriteLine", varTable["i"].operand);
             mainMethod.Invoke(typeof(IO), "WriteLine", varTable["j"].operand);
@@ -129,16 +145,18 @@ namespace Zodiac {
         private void AddParseNodeRec(ParseTreeNode node)
         {
             if (node == null) return;
-            //BnfTerm term = node.Term;
+
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+
             switch (bnf)
             {
                 case BNF.program_heading:
-                    //VariableDefinition(node);
+                    ProgramHeading(node);
                     return;
                 case BNF.scope_body:
                     ScopeBody(node);
                     return;
+                
                
                 default:
                     break;
@@ -148,7 +166,20 @@ namespace Zodiac {
                 AddParseNodeRec(child);
         }
 
+        private void ProgramHeading(ParseTreeNode node)
+        {
+            if (node == null) return;
+            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+            switch (bnf)
+            {
 
+                default:
+                    break;
+            }
+
+            foreach (var child in node.ChildNodes)
+                ProgramHeading(child);
+        }
 
         private void ScopeBody(ParseTreeNode node)
         {
@@ -157,12 +188,17 @@ namespace Zodiac {
             switch (bnf)
             {
                 case BNF.simple_statement:
-                    simple_statement(node);
+                    SimpleStatement(node);
                     return;
                 case BNF.structed_statement:
                     StructedStatement(node);
                     return;
-
+                case BNF.definition:
+                    FuncTypeDefinition(node);
+                    return;
+                case BNF.return_statement:
+                    ReturnStatement(node);
+                    return;
                 default:
                     break;
             }
@@ -171,7 +207,29 @@ namespace Zodiac {
                 ScopeBody(child);
         }
 
-        private void simple_statement(ParseTreeNode node)
+        private void FuncTypeDefinition(ParseTreeNode node)
+        {
+            if (node == null) return;
+            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+            switch (bnf)
+            {
+                case BNF.function_definition:
+                    FunctionDefinition(node);
+                    return;
+                case BNF.type_definition:
+                    TypeDefinition(node);
+                    return;
+
+                default:
+                    break;
+            }
+
+            foreach (var child in node.ChildNodes)
+                FunctionDefinition(child);
+        }
+
+
+        private void SimpleStatement(ParseTreeNode node)
         {
             if (node == null) return;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
@@ -180,27 +238,38 @@ namespace Zodiac {
                 case BNF.variable_definition:
                     VariableDefinition(node);
                     return;
-                case BNF.function_definition:
-                    FunctionDefinition(node);
-                    return;
                 case BNF.assignment_statement:
                     AssignmentStatement(node);
-                    return;
-                case BNF.type_definition:
-                    TypeDefinition(node);
                     return;
                 case BNF.access_statement:
                     AccessStatement(node);
                     return;
+
                 default:
                     break;
             }
 
             foreach (var child in node.ChildNodes)
-                simple_statement(child);
-
+                SimpleStatement(child);
         }
 
+        private void StructedStatement(ParseTreeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ReturnStatement(ParseTreeNode node)
+        {
+            if (node == null) return;
+            BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+
+            var ownerFunc = funcStack.Peek();
+
+            var returnValue = Expression(node.ChildNodes[1]);
+
+            ownerFunc.Return(returnValue.operand);
+            
+        }
 
         private void VariableDefinition(ParseTreeNode node ) {
             CodeGen ownerFunc = funcStack.Peek();
@@ -248,7 +317,7 @@ namespace Zodiac {
             TypeGen ownerType = typeStack.Peek();
             //------------function header
             var isStatic = false;
-            if (node.ChildNodes[0].ChildNodes.Count != 0) isStatic = true;//static
+            if (node.ChildNodes[0].ChildNodes.Count != 0 || ownerType == defaultClass) isStatic = true;//static
             var funcIdt = node.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.Text;//function_identifier
             //------------ret Type
             var retNode = node.ChildNodes[2].ChildNodes[0].ChildNodes[0];
@@ -266,30 +335,43 @@ namespace Zodiac {
                 func = ownerType.Public.Method(funcRetType, funcIdt);
 
 
-            var paraNode = node.ChildNodes[3].ChildNodes[0].ChildNodes[0];
-            int paraSize = paraNode.ChildNodes.Count;
+            var paraBlockNode = node.ChildNodes[3].ChildNodes[0];
+            int paraSize = 0;
             var paraNames = new List<string>();
             var paras = new List<Operand>();
-            for(int i = 0; i < paraSize; i++)
+            if (paraBlockNode.ChildNodes.Count != 0)
             {
-                paraNames.Add(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[0].Token.Text);
-                var typeStr = getTypeString(paraNode.ChildNodes[i].ChildNodes[1].ChildNodes[3]);
-                func = func.Parameter(getType(typeStr), paraNames[i]);
+                var parasNode = paraBlockNode.ChildNodes[0];
+                paraSize = parasNode.ChildNodes.Count;
+                for (int i = 0; i < paraSize; i++)
+                {
+                    paraNames.Add(parasNode.ChildNodes[i].ChildNodes[1].ChildNodes[0].Token.Text);
+                    var typeStr = getTypeString(parasNode.ChildNodes[i].ChildNodes[3]);
+                    func = func.Parameter(getType(typeStr), paraNames[i]);
+                }
+
             }
 
             CodeGen code = func.GetCode();
+
+            funcStack.Push(code);
+
             for(int i = 0; i < paraSize; i++)
             {
-                paras[i] = code.Arg(paraNames[i]);
+                paras.Add(code.Arg(paraNames[i]));
             }
             var statementsNode = node.ChildNodes[3].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[0];
             //int statementSize = statementsNode.ChildNodes.Count;
-            foreach(ParseTreeNode statementNode in statementsNode.ChildNodes)
+            ScopeBody(statementsNode);
+            funcStack.Pop();
+            /*foreach(ParseTreeNode statementNode in statementsNode.ChildNodes)
             {
 
-            }
+            }*/
+
+
         }
-        private string getTypeString(ParseTreeNode node)
+        public string getTypeString(ParseTreeNode node)
         {
             if (node.ToString() == "required_type")
             {
@@ -301,12 +383,12 @@ namespace Zodiac {
             }
             return null;
         }
-        private string getTypeString(Type type)
+        private string getTypeString(Type type) //TODO => type.Name ?? null; 
         {
             if (type == typeof(int))
                 return "long";
             else if (type == typeof(bool))
-                return "real";
+                return "bool";
             else if (type == typeof(float))
                 return "real";
             else if (type == typeof(bool))
@@ -340,9 +422,64 @@ namespace Zodiac {
             ZOperand ret = MemberAccess(node);
         }
 
-        private void StructedStatement(ParseTreeNode node)
+        
+        private ContextualOperand Compute(ContextualOperand leftValue, string oper, ContextualOperand rightValue = null)
         {
-            throw new NotImplementedException();
+            if (rightValue as object == null)
+            {
+                if (oper == "+")
+                    return +leftValue;
+                else if (oper == "-")
+                    return -leftValue;
+                else if (oper == "!")
+                    return !leftValue;
+                else if (oper == "~")
+                    return ~leftValue;
+                else throw new Exception("invalid unary operator");
+            }
+            else
+            {
+                if (oper == "+")
+                    return leftValue + rightValue;
+                else if (oper == "-")
+                    return leftValue - rightValue;
+                else if (oper == "*")
+                    return leftValue * rightValue;
+                else if (oper == "/")
+                    return leftValue / rightValue;
+                else if (oper == "%")
+                    return leftValue % rightValue;
+                else if (oper == ">>")
+                    return leftValue.RightShift(rightValue);
+                else if (oper == "<<")
+                    return leftValue.LeftShift(rightValue);
+                else if (oper == "==")
+                    return leftValue == rightValue;
+                else if (oper == "!=")
+                    return leftValue != rightValue;
+                else if (oper == "&")
+                    return leftValue & rightValue;
+                else if (oper == "^")
+                    return leftValue ^ rightValue;
+                else if (oper == "&&")
+                    return leftValue && rightValue;
+                else if (oper == "||")
+                    return leftValue || rightValue;
+
+            }
+            return null;
+        }
+
+        private ZOperand Compute(ZOperand left, string oper, ZOperand right = null )
+        {
+
+
+            ContextualOperand resultValue = null;
+            resultValue = right == null ? Compute(left.operand, oper, null) : Compute(left.operand, oper, right.operand);
+
+            if (resultValue == null) throw new Exception("invaild expression");
+            else return new ZOperand(resultValue, getTypeString(resultValue.GetReturnType(tm)));
+
         }
 
         private ZOperand Expression(ParseTreeNode node)
@@ -350,24 +487,36 @@ namespace Zodiac {
             CodeGen ownerFunc = funcStack.Peek();
             if (node == null ) return null;
             BNF bnf = GetBNF(node.Token == null ? node.Term.Name : node.Token.Terminal.ToString());
+
             switch (bnf) {
                 case BNF.number:
                     return new ZOperand(ownerFunc.Local(typeof(int), int.Parse(node.Token.Text)), "long");
 
                 case BNF.member_access:
                     return MemberAccess(node);
-
+                case BNF.unary_expression:
+                
+                    string oper = node.ChildNodes[0].ChildNodes[0].Token.Terminal.ToString();
+                    return Compute(Expression(node.ChildNodes[1]), oper);
+               
+               
+                    
                 default:
-                    //@TODO
-                    if (node.ChildNodes.Count == 3)
+                    
+                    if (node.ChildNodes.Count == 3)  //primmary_expression
                     {
-                        return new ZOperand(Expression(node.ChildNodes[0]).operand.Add(Expression(node.ChildNodes[2]).operand), "long");
+                        // left = ;
+
+                        string oper2 = node.ChildNodes[1].Token.Terminal.ToString();
+                        //throw new NotImplementedException();
+                        return Compute(Expression(node.ChildNodes[0]), oper2, Expression(node.ChildNodes[2]));
 
                     }
+                    else
+                        return Expression(node.ChildNodes[0]);
                     //return mainMethod.AssignAdd(Expression(node.ChildNodes[0]), Expression(node.ChildNodes[2])) );
-                    break;
             }
-            return Expression(node.ChildNodes[0]);
+           
         }
 
         private ZOperand MemberAccess(ParseTreeNode node)
@@ -389,12 +538,16 @@ namespace Zodiac {
                             member = segment.ChildNodes[0];
                             if(member.ChildNodes.Count == 0)
                             {
-                                if(mainAccess.operand == null)
+                                ContextualOperand ret;
+                                Type type;
+                                if (mainAccess.operand as Object == null)
                                 {
-                                    //TODO
+                                    ret = st.Invoke(tm.MapType(defaultClass),mainAccess.name);
+                                    type = typeTable[defaultClass.Name][mainAccess.name];
+                                    return new ZOperand(ret, getTypeString(type));
                                 }
-                                Operand ret = mainAccess.operand.Invoke(mainAccess.name, tm);
-                                Type type = typeTable[mainAccess.type][mainAccess.name];
+                                ret = mainAccess.operand.Invoke(mainAccess.name);
+                                type = typeTable[mainAccess.type][mainAccess.name];
                                 return new ZOperand(ret, getTypeString(type));
                             }
                             else
@@ -402,10 +555,10 @@ namespace Zodiac {
                                 int paraSize = member.ChildNodes.Count;
                                 List<Operand> paras = new List<Operand>();
                                 for (int i = 0; i < paraSize; i++)
-            {
+                                {
                                     paras.Add(Expression(member.ChildNodes[i]).operand);
                                 }
-                                Operand ret = mainAccess.operand.Invoke(mainAccess.name, tm, paras.ToArray());
+                                var ret = mainAccess.operand.Invoke(mainAccess.name, paras.ToArray());
 
                             }
                             break;
@@ -476,7 +629,7 @@ namespace Zodiac {
             {
                     //really meaningful?
                     var segment = node.ChildNodes[1].ChildNodes[0];
-        }
+            }
             else
             {
                     return new ZOperand(null, null, idt_ext);
@@ -486,6 +639,11 @@ namespace Zodiac {
             return FunctionAccess(mainAccessNode);
         }
 
+       /* private BNF GetNodeType(string )
+        {
+
+        }
+        */
 
         private BNF GetBNF(string BNFString) {
             BNF bnf;
@@ -499,7 +657,13 @@ namespace Zodiac {
             return bnf;
         }
 
-     
+ 
+
+
+
+
+
+
 
         private enum BNF {
             program = 0,
@@ -519,6 +683,7 @@ namespace Zodiac {
             assignment_reference_operator,
             Keysymbol,
             expression_list,
+            unary_expression,
             bin_op_expression,
             primary_expression,
             literal,
@@ -534,7 +699,9 @@ namespace Zodiac {
             argument_list,
             array_indexer,
             dot,
-            function_definition
+            function_definition,
+            definition,
+            return_statement,
         }
     }
 }
