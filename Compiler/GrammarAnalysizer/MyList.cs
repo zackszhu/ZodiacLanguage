@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GrammarAnalysizer {
     public class MyList {
         private ArrayList _elements = new ArrayList();
-        private int _offset = 0;
+        private int _offset;
 
         public int Length => _elements.Count;
 
