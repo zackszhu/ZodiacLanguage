@@ -314,7 +314,7 @@ namespace Zodiac {
             //
         }
 
-        private void FunctionDefinition(ParseTreeNode node)
+        private void FunctionDefinition(ParseTreeNode node, bool isVirtual = false)
         {
             //------------the owner of the fucntion
             TypeGen ownerType = typeStack.Peek();
@@ -330,7 +330,24 @@ namespace Zodiac {
 
             funcTable[ownerType.Name][funcIdt] = funcRetType;
 
-            var func = isStatic ? ownerType.Public.Static.Method(funcRetType, funcIdt) : ownerType.Public.Method(funcRetType, funcIdt);
+            var funcOpt = (Convert.ToInt32(isVirtual) << 1) + Convert.ToInt32(isStatic);
+            MethodGen func;
+            switch (funcOpt) {
+                case 0:
+                   func = ownerType.Public.Method(funcRetType, funcIdt);
+                    break;
+                case 1:
+                    func = ownerType.Public.Static.Method(funcRetType, funcIdt);
+                    break;
+                case 2:
+                    func = ownerType.Public.Virtual.Method(funcRetType, funcIdt);
+                    break;
+                case 3:
+                    func = ownerType.Public.Virtual.Static.Method(funcRetType, funcIdt);
+                    break;
+                default:
+                    throw new Exception("Function option error(which seems to be impossible)");
+            }
 
             var paraBlockNode = node.ChildNodes[3].ChildNodes[0];
             var paraSize = 0;
@@ -379,11 +396,11 @@ namespace Zodiac {
         {
             if (type == typeof(int))
                 return "long";
-            else if (type == typeof(bool))
+            if (type == typeof(bool))
                 return "bool";
-            else if (type == typeof(float))
+            if (type == typeof(float))
                 return "real";
-            else if (type == typeof(bool))
+            if (type == typeof(bool))
                 return "bool";
             return null;
         }
@@ -432,12 +449,19 @@ namespace Zodiac {
                         TypeMemVarDef(member.ChildNodes[0]);
                         break;
                     case "member_function":
-                        continue;
+                        TypeMemFuncDef(member.ChildNodes[0]);
+                        break;
                 }
             }
 
             typeStack.Pop();
 
+            //throw new NotImplementedException();
+        }
+
+        private void TypeMemFuncDef(ParseTreeNode node) {
+            var isVirtual = node.ChildNodes[0].ChildNodes.Count == 1;
+            FunctionDefinition(node.ChildNodes[1], isVirtual);
             //throw new NotImplementedException();
         }
 

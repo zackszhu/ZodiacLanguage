@@ -1,5 +1,8 @@
 type Foo {
     var z = long;
+    func a : long{
+        return 1;
+    }
 }
 
 func ok : long
