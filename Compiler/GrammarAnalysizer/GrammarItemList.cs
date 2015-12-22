@@ -25,7 +25,7 @@ namespace Zodiac {
         public readonly string Caption;
         public readonly string LongCaption;
         public readonly string Location; //location of assembly containing the grammar
-        public readonly string TypeName; //full type name
+        public readonly string TypeName; //full Type Name
         internal bool _loading;
 
         public GrammarItem(string caption, string location, string typeName) {
@@ -38,7 +38,7 @@ namespace Zodiac {
             _loading = true;
             Location = assemblyLocation;
             TypeName = grammarClass.FullName;
-            //Get language name from Language attribute
+            //Get language Name from Language attribute
             Caption = grammarClass.Name; //default caption
             LongCaption = Caption;
             var langAttr = LanguageAttribute.GetValue(grammarClass);
