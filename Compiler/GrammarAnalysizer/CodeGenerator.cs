@@ -27,7 +27,8 @@ namespace Zodiac {
     internal class CodeGenerator {
         private string name;
         private Dictionary<string, ZOperand> varTable;
-        private Dictionary<string, Dictionary<string, Type>> typeTable;
+        private Dictionary<string, Dictionary<string, Type>> funcTable;
+        private Dictionary<string, Type> typeTable;
         private Stack<TypeGen> typeStack;
         private Stack<CodeGen> funcStack;
         private AssemblyGen ag;
@@ -43,7 +44,8 @@ namespace Zodiac {
 
         public CodeGenerator() {
             varTable = new Dictionary<string, ZOperand>();
-            typeTable = new Dictionary<string, Dictionary<string, Type>>();
+            funcTable = new Dictionary<string, Dictionary<string, Type>>();
+            typeTable = new Dictionary<string, Type>();
             typeStack = new Stack<TypeGen>();
             funcStack = new Stack<CodeGen>();
 
@@ -61,8 +63,8 @@ namespace Zodiac {
         /*
         public void InitIO() {
             IOClass = ag.Public.Class("IO");
-            typeTable["IO"] = new Dictionary<string, Type>();
-            typeTable["IO"]["write"] = typeof(void);
+            funcTable["IO"] = new Dictionary<string, Type>();
+            funcTable["IO"]["write"] = typeof(void);
 
             CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
                 .Parameter(typeof(string), "arg");
@@ -89,7 +91,13 @@ namespace Zodiac {
 
         public void InitRequiredType()
         {
-            typeTable["long"] = new Dictionary<string, Type> {["ToString"] = typeof (string)};
+            funcTable["long"] = new Dictionary<string, Type> {["ToString"] = typeof (string)};
+
+            typeTable.Add("long", typeof(int));
+            typeTable.Add("real", typeof(double));
+            typeTable.Add("bool", typeof(bool));
+            typeTable.Add("list", typeof(MyList));
+            typeTable.Add("char", typeof(char));
         }
 
         private void InitTypeMethod() {
@@ -100,7 +108,8 @@ namespace Zodiac {
             if (parseTree == null) return;
 
             defaultClass = ag.Public.Class("Default");
-            typeTable["Default"] = new Dictionary<string, Type>();
+            typeTable.Add("Default", defaultClass);
+            funcTable["Default"] = new Dictionary<string, Type>();
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
 
             //generator stack
@@ -219,7 +228,7 @@ namespace Zodiac {
             }
 
             foreach (var child in node.ChildNodes)
-                FunctionDefinition(child);
+                FuncTypeDefinition(child);
         }
 
 
@@ -319,7 +328,7 @@ namespace Zodiac {
             //int retSize = retNode.ChildNodes.Count;
             Type funcRetType = getType(retType);
 
-            typeTable[ownerType.Name][funcIdt] = funcRetType;
+            funcTable[ownerType.Name][funcIdt] = funcRetType;
 
             var func = isStatic ? ownerType.Public.Static.Method(funcRetType, funcIdt) : ownerType.Public.Method(funcRetType, funcIdt);
 
@@ -378,28 +387,64 @@ namespace Zodiac {
                 return "bool";
             return null;
         }
-        private Type getType(string typeStr) {
-            switch (typeStr) {
-                case "long":
-                    return typeof(int);
-                case "bool":
-                    return typeof(bool);
-                case "real":
-                    return typeof(float);
-                case "list":
-                    return typeof(ArrayList);
-            }
-            return typeof(int);
-        }
+
+        private Type getType(string typeStr) => typeTable[typeStr];
+//            {
+//            switch (typeStr) {
+//                case "long":
+//                    return typeof(int);
+//                case "bool":
+//                    return typeof(bool);
+//                case "real":
+//                    return typeof(float);
+//                case "list":
+//                    return typeof(ArrayList);
+//            }
+//            return typeof(int);
+//        }
 
         private void AssignmentStatement(ParseTreeNode node)
         {
             throw new NotImplementedException();
         }
             
-        private void TypeDefinition(ParseTreeNode node)
-        {
-            throw new NotImplementedException();
+        private void TypeDefinition(ParseTreeNode node) {
+            // type init
+            var isDerived = node.ChildNodes[2].ChildNodes.Count > 0;
+            var typeName = node.ChildNodes[1].Token.Text;
+            TypeGen thisType;
+            if (isDerived) {
+                var baseName = node.ChildNodes[2].ChildNodes[1].Token.Text;
+                if (!typeTable.ContainsKey(baseName)) throw new NotImplementedException();
+                var baseType = typeTable[baseName];
+                thisType = ag.Public.Class(typeName, baseType);
+            }
+            else {
+                thisType = ag.Public.Class(typeName);
+            }
+            typeTable.Add(typeName, thisType);
+            typeStack.Push(thisType);
+
+            var structured = node.ChildNodes[3];
+            foreach (var member in structured.ChildNodes) {
+                switch (member.ChildNodes[0].Term.Name) {
+                    case "member_variable":
+                        TypeMemVarDef(member.ChildNodes[0]);
+                        break;
+                    case "member_function":
+                        continue;
+                }
+            }
+
+            typeStack.Pop();
+
+            //throw new NotImplementedException();
+        }
+
+        private void TypeMemVarDef(ParseTreeNode node) {
+            var varType = getType(getTypeString(node.ChildNodes[3]));
+            var currentClass = typeStack.Peek();
+            currentClass.Public.Field(varType, node.ChildNodes[1].Token.Text);
         }
 
         private void AccessStatement(ParseTreeNode node)
@@ -533,11 +578,11 @@ namespace Zodiac {
                             if (mainAccess.Operand as Object == null)
                             {
                                 ret = st.Invoke(tm.MapType(defaultClass),mainAccess.Name);
-                                type = typeTable[defaultClass.Name][mainAccess.Name];
+                                type = funcTable[defaultClass.Name][mainAccess.Name];
                                 return new ZOperand(ret, getTypeString(type));
                             }
                             ret = mainAccess.Operand.Invoke(mainAccess.Name);
-                            type = typeTable[mainAccess.Type][mainAccess.Name];
+                            type = funcTable[mainAccess.Type][mainAccess.Name];
                             return new ZOperand(ret, getTypeString(type));
                         }
                         else

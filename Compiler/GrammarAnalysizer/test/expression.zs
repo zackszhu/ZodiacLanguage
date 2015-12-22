@@ -1,8 +1,12 @@
+type Foo {
+    var z = long;
+}
+
 func ok : long
 {
-    
+
     var x = 4;
-    return x;   
+    return x;
 }
 
 var i = ~111;
