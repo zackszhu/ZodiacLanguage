@@ -15,5 +15,6 @@ namespace GrammarAnalysizer {
                 return typeof (double);
             }
         }
+       
     }
 }
