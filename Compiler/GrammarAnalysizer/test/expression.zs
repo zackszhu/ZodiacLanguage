@@ -1,3 +1,4 @@
+@{
 type foo{
 
 	var i = long;
@@ -26,8 +27,8 @@ var f = foo();
 var b = bar(f);
 var i = 1;
 var j = b.barbar();
-
-io.writeln(i);
+}@
+IO.writeln(i);
 
 
 @@ ^^ 没实现

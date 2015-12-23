@@ -2,11 +2,11 @@
 
 namespace GrammarAnalysizer {
     public class IO {
-        public void writeln(object arg) {
+        public static void writeln(object arg) {
             Console.WriteLine(arg.ToString());
         }
 
-        public int readln() {
+        public static int readln() {
             return int.Parse(s: Console.ReadLine());
         }
     }

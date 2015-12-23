@@ -249,7 +249,7 @@ namespace Compiler {
             /* 2 Type declarations and definitions */
             /* 2.1 Required-types */
             required_type.Rule = identifier | simple_type | list_type /*| func_type*/;
-            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" | "IO";
+            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" ;
             list_type.Rule = ToTerm("list");
             // func_type.Rule = ToTerm("func");
 
@@ -428,8 +428,8 @@ namespace Compiler {
 
             #region Define_Keywords
 
-            this.MarkReservedWords("IO", "long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
-                , "False", "if", "else", "for in", "while", "break", "continue", "from", "where", "select", "ance", "desc", "IO", "have", "Null");
+            this.MarkReservedWords("long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
+                , "False", "if", "else", "for in", "while", "break", "continue", "from", "where", "select", "ance", "desc", "have", "Null");
 
             #endregion
         }
