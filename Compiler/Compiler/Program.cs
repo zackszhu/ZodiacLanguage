@@ -45,6 +45,7 @@ namespace Compiler {
             var required_type = new NonTerminal("required_type");
             var simple_type = new NonTerminal("simple_type");
             var list_type = new NonTerminal("list_type");
+            var user_type = new NonTerminal("user_type");
             //  var func_type = new NonTerminal("func_type");
             //var type_declaration = new NonTerminal("type_declaration");
             var type_definition = new NonTerminal("type_definition");
@@ -55,6 +56,7 @@ namespace Compiler {
             var member_variable = new NonTerminal("member_variable");
             var member_function = new NonTerminal("member_function");
             var member_family_opt = new NonTerminal("family option");
+            
 
             /* 3 Constructors and Convertor */
             var constructor = new NonTerminal("constructor");
@@ -223,7 +225,7 @@ namespace Compiler {
 
             /* Basic */
             /* identifier */
-            identifier_ext.Rule = identifier | required_type | inherit_converter;  //??
+            identifier_ext.Rule = required_type | inherit_converter;  //??
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
@@ -248,9 +250,10 @@ namespace Compiler {
             /* Rule */
             /* 2 Type declarations and definitions */
             /* 2.1 Required-types */
-            required_type.Rule = simple_type | list_type /*| func_type*/;
+            required_type.Rule = simple_type | list_type | identifier/*| func_type*/;
             simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" | "IO";
             list_type.Rule = ToTerm("list");
+            user_type.Rule = identifier;
             // func_type.Rule = ToTerm("func");
 
             /* 2.1 Type-declarations */
@@ -328,6 +331,7 @@ namespace Compiler {
             function_parameter_block.Rule = function_parameter_list | function_parameter_default_list | (function_parameter_list + function_parameter_default_list) | Empty;
             //function_parameter_list_opt.Rule = function_parameter_list | Empty;
             function_parameter_list.Rule = MakePlusRule(function_parameter_list, null, function_parameter);
+
             function_parameter.Rule = "param" + identifier_list + assignment_operator + required_type + semi;
             //function_parameter_default_list_opt.Rule = function_parameter_default_list | Empty;
             function_parameter_default_list.Rule = MakePlusRule(function_parameter_default_list, null, function_parameter_default);

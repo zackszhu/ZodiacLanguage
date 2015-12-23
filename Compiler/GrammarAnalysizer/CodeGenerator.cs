@@ -39,8 +39,11 @@ namespace Zodiac {
         private TypeGen defaultClass;
         private CodeGen mainMethod;
 
+        //error info
         private int lineNumber;
         private int columnNumber;
+        private bool GeneratedOK;
+
 
         public CodeGenerator() {
             varTable = new Stack<Dictionary<string, ZOperand>>();
@@ -106,7 +109,7 @@ namespace Zodiac {
 
         public void Generate(ParseTree parseTree) {
             if (parseTree == null) return;
-
+            GeneratedOK = true;
             defaultClass = ag.Public.Class("Default");
             typeTable.Add("Default", defaultClass);
             funcTable["Default"] = new Dictionary<string, Type>();
@@ -133,8 +136,11 @@ namespace Zodiac {
 
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["i"].Operand);
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["j"].Operand);
-            ag.Save();
-            AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
+            if (GeneratedOK ) {
+                ag.Save();
+                AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
+            }
+
         }
 
 
@@ -182,7 +188,7 @@ namespace Zodiac {
             
             if (node == null) return;
             BNF bnf = GetBNF(node);
-            try {
+            //try {
                 switch (bnf)
                 {
                     case BNF.simple_statement:
@@ -200,11 +206,12 @@ namespace Zodiac {
                     default:
                         break;
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("("+lineNumber+","+columnNumber+"):\t"+ e.Message);
-            }
+         //   }
+           // catch (Exception e)
+           // {
+            //    GeneratedOK = false;
+            //    Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
+          //  }
             foreach (var child in node.ChildNodes)
                 ScopeBody(child);
         }
@@ -319,8 +326,16 @@ namespace Zodiac {
 
         private void FunctionDefinition(ParseTreeNode node, bool isVirtual = false)
         {
-            var funcIdt = GetTokenText( node.ChildNodes[1].ChildNodes[0].ChildNodes[1]);//function_identifier
-            if (funcIdt != "init")
+            var functype = GetTokenText(node.ChildNodes[1].ChildNodes[0].ChildNodes[0]);
+
+            var funcIdt = GetTokenText(node.ChildNodes[1].ChildNodes[0].ChildNodes[1]);//function_identifier
+
+
+            if (functype == "oper" )
+            {
+                OperatorDefinition(node, funcIdt ,isVirtual);
+            }
+            else if (funcIdt != "init")
             {
                 NormalFunctionDefinition(node, funcIdt, isVirtual);
             }
@@ -328,6 +343,82 @@ namespace Zodiac {
             {
                 ConstructorFunctionDefinition(node, isVirtual);
             }
+        }
+
+        private void OperatorDefinition(ParseTreeNode node, string funcIdt, bool isVirtual)
+        {
+            //  the owner of the fucntion
+            TypeGen ownerType = typeStack.Peek();
+            //  function header
+            bool isStatic = node.ChildNodes[0].ChildNodes.Count != 0 || ownerType == defaultClass;
+            //  ret Type
+            Type funcRetType;
+            //  parse return type
+            var retNode = node.ChildNodes[2];
+            if (retNode.ChildNodes.Count == 0)
+            {
+                throw new Exception("Operator Function" + funcIdt + " can't find a return type");
+            }
+            else
+            {
+                if (retNode.ChildNodes.Count > 2) throw new Exception("Operator Function" + funcIdt +" with too many return types");
+                retNode = retNode.ChildNodes[0].ChildNodes[0];
+                string retType = getTypeString(retNode);
+                funcRetType = getType(retType);
+            }
+
+            
+
+            //  parse parameter
+            var paraBlockNode = node.ChildNodes[3].ChildNodes[0];
+            var paraSize = 0;
+            var paraNames = new List<string>();
+            var paraTypes = new List<string>();
+            if (paraBlockNode.ChildNodes.Count != 0)
+            {
+                var parasNode = paraBlockNode.ChildNodes[0];
+                paraSize = parasNode.ChildNodes.Count;
+                for (int i = 0; i < paraSize; i++)
+                {
+                    paraNames.Add(GetTokenText(parasNode.ChildNodes[i].ChildNodes[1].ChildNodes[0]));
+                    var typeStr = getTypeString(parasNode.ChildNodes[i].ChildNodes[3]);
+                    paraTypes.Add(typeStr);
+                   // func = func.Parameter(getType(typeStr), paraNames[i]);
+                }
+            }
+
+
+            //    create operator func -
+            MethodGen func;
+            if (paraNames.Count == 1)
+            {
+                var operType = getOverloadUnaryOperator(funcIdt);
+                func = ownerType.Operator(operType, funcRetType, getType(paraTypes[0]), paraNames[0]);
+            }
+            else if (paraNames.Count == 2)
+            {
+                var operType = getOverloadUnaryOperator(funcIdt);
+                func = ownerType.Operator(operType, funcRetType, getType(paraTypes[0]), paraNames[0], getType(paraTypes[1]), paraNames[1]);
+            }
+            else throw new Exception("Operator function get too many arguemnts");
+
+            // parse function body
+
+            CodeGen code = func.GetCode();
+
+            funcStack.Push(code);
+            PushScope();
+            for (var i = 0; i < paraSize; i++)
+            {
+                var para = code.Arg(paraNames[i]);
+                AddVarToVarTable(paraNames[i], new ZOperand(para, paraTypes[i]));
+            }
+            var statementsNode = node.ChildNodes[3].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[0];
+            //int statementSize = statementsNode.ChildNodes.Count;
+            ScopeBody(statementsNode);
+            PopScope();
+            funcStack.Pop();
+
         }
 
         private void NormalFunctionDefinition(ParseTreeNode node, string funcIdt, bool isVirtual)
@@ -343,6 +434,7 @@ namespace Zodiac {
             {
                 funcRetType = typeof(void);
             }
+
             else
             {
                 retNode = retNode.ChildNodes[0].ChildNodes[0];
@@ -352,6 +444,7 @@ namespace Zodiac {
 
             funcTable[ownerType.Name][funcIdt] = funcRetType;
 
+            // create func
             var funcOpt = (Convert.ToInt32(isVirtual) << 1) + Convert.ToInt32(isStatic);
             MethodGen func;
             switch (funcOpt)
@@ -372,6 +465,7 @@ namespace Zodiac {
                     throw new Exception("Function option error(which seems to be impossible)");
             }
 
+            //-------------parse parameter
             var paraBlockNode = node.ChildNodes[3].ChildNodes[0];
             var paraSize = 0;
             var paraNames = new List<string>();
@@ -387,8 +481,10 @@ namespace Zodiac {
                     paraTypes.Add(typeStr);
                     func = func.Parameter(getType(typeStr), paraNames[i]);
                 }
-
             }
+
+
+            // parse function body
 
             CodeGen code = func.GetCode();
 
@@ -410,6 +506,9 @@ namespace Zodiac {
         {
 
         }
+
+
+
 
         private string getTypeString(ParseTreeNode node)
         {
@@ -500,7 +599,67 @@ namespace Zodiac {
             ZOperand ret = MemberAccess(node);
         }
 
+        
+        private Operator getOverloadUnaryOperator(string oper)
+        {
+            switch (oper)
+            {
+                case "+":
+                    return Operator.Plus;
+                case "-":
+                    return Operator.Minus;
+                case "!":
+                    return Operator.LogicalNot;
+                case "~":
+                    return Operator.Not;
+                default:
+                    throw new Exception("invalid unary operator " + oper);
+            }
+        }
 
+        private Operator getOverlaodDualOperator(string oper)
+        {
+            switch (oper)
+            {
+                case "+":
+                    return Operator.Add;
+                case "-":
+                    return Operator.Subtract;
+                case "*":
+                    return Operator.Multiply;
+                case "/":
+                    return Operator.Divide;
+                case "%":
+                    return Operator.Modulus;
+                case ">>":
+                    return Operator.RightShift;
+                case "<<":
+                    return Operator.LeftShift;
+                case "&":
+                    return Operator.And;
+                case "^":
+                    return Operator.Xor;
+                case "&&":   //attention
+                case "||":
+                    throw new Exception("operator " + oper +" is not support for overload");
+                case ">":
+                    return Operator.GreaterThan;
+                case "<":
+                    return Operator.LessThan;
+                case ">=":
+                    return Operator.GreaterThanOrEqual;
+                case "<=":
+                    return Operator.LessThanOrEqual;
+                case "==":
+                    return Operator.Equality;
+                case "!=":
+                    return Operator.Inequality;
+                default:
+                    throw new Exception("invalid operator " + oper);
+            }
+        }
+
+        
         private Operand Compute(Operand leftValue, string oper, Operand rightValue = null)
         {
             if (rightValue as object == null)
@@ -514,8 +673,9 @@ namespace Zodiac {
                         return !leftValue;
                     case "~":
                         return ~leftValue;
+
                     default:
-                        throw new Exception("invalid unary operator");
+                        throw new Exception("invalid unary operator "+ oper);
                 }
             }
             else
@@ -535,10 +695,6 @@ namespace Zodiac {
                         return leftValue.RightShift(rightValue);
                     case "<<":
                         return leftValue.LeftShift(rightValue);
-                    case "==":
-                        return leftValue == rightValue;
-                    case "!=":
-                        return leftValue != rightValue;
                     case "&":
                         return leftValue & rightValue;
                     case "^":
@@ -547,10 +703,25 @@ namespace Zodiac {
                         return leftValue && rightValue;
                     case "||":
                         return leftValue || rightValue;
+                    case ">":
+                        return leftValue > rightValue;
+                    case "<":
+                        return leftValue < rightValue;
+                    case ">=":
+                        return leftValue >= rightValue;
+                    case "<=":
+                        return leftValue <= rightValue;
+                    case "==":
+                        return leftValue == rightValue;
+                    case "!=":
+                        return leftValue != rightValue;
+                    case "^^":
+                        throw new Exception("operator " + oper + "not implemented");
+                    default:
+                        throw new Exception("invalid operator " +oper);
+                        
                 }
-
             }
-            return null;
         }
 
         private ZOperand Compute(ZOperand left, string oper, ZOperand right = null)
@@ -572,16 +743,22 @@ namespace Zodiac {
             switch (bnf) {
                 case BNF.number:
                     // @TODO assist function?
-                    return new ZOperand(ownerFunc.Local(typeof(int), int.Parse(GetTokenText(node))), "long");
+                    {
+                        string text = GetTokenText(node);
+                        var numberType = AssistFunction.GetNumberType(text);
 
+                        return numberType == typeof(int)  
+                            ? new ZOperand(ownerFunc.Local(typeof(int), int.Parse(GetTokenText(node))), "long")
+                            : new ZOperand(ownerFunc.Local(typeof(double), double.Parse(GetTokenText(node))), "real");
+
+                    }
+
+                  
                 case BNF.member_access:
                     return MemberAccess(node);
                 case BNF.unary_expression:
-
                     oper = node.ChildNodes[0].ChildNodes[0].Token.Terminal.ToString();
                     return Compute(Expression(node.ChildNodes[1]), oper);
-
-
 
                 default:
 
@@ -692,6 +869,8 @@ namespace Zodiac {
             }
             return MemberAccess(mainAccessNode);
         }
+
+
         private ZOperand FunctionAccess(ParseTreeNode node)
         {
             CodeGen ownerFunc = funcStack.Peek();
@@ -788,6 +967,7 @@ namespace Zodiac {
 
         private void AddVarToVarTable(string varName, ZOperand zOperand)
         {
+            if (varTable.Peek().ContainsKey(varName)) throw new Exception("variable " + varName + " can't have duplicate definition");
             varTable.Peek()[varName] = zOperand;
         }
 
@@ -828,6 +1008,7 @@ namespace Zodiac {
             }
             throw new Exception("Var: " + varName + " can not be found!");
         }
+
 
         private enum BNF {
             program = 0,

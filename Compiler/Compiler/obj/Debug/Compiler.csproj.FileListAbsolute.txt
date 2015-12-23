@@ -47,7 +47,6 @@ C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Zodiac.dll
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Zodiac.pdb
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Zodiac.dll.CodeAnalysisLog.xml
 C:\Users\alwindybeing\Source\Repos\ZodiacLanguage\Compiler\Zodiac.dll.lastcodeanalysissucceeded
-E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.dll
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Zodiac.pdb
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Zodiac.dll
