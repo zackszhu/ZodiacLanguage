@@ -1,18 +1,23 @@
-type Foo {
-    var z = long;
-    func a : long{
-        return 1;
-    }
+type s{
+
+	var i = long;
+
+	func ok : long
+	{
+    	param ii = long;
+    	param j = long;
+
+    	i = ii;
+    	return i;
+	}	
 }
 
-func ok : long
-{
 
-    var x = 4;
-    return x;
-}
 
+
+
+var ss = s();
 var i = ~111;
-var j = 44 + 99 / 66  * 55 + ok();
+var j = 44 + 99 / 66  * 55 + ss.ok(33, 2);
 
 @@ ^^ 没实现
