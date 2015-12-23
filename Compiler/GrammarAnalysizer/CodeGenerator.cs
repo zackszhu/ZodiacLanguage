@@ -28,7 +28,7 @@ namespace Zodiac {
     internal class CodeGenerator {
         private string name;
         private Stack<Dictionary<string, ZOperand>> varTable;
-        private Dictionary<string, Dictionary<string, Type>> funcTable;
+        //private Dictionary<string, Dictionary<string, Type>> typeMemberTable;
         private Dictionary<string, Type> typeTable;
         private Stack<TypeGen> typeStack;
         private Stack<CodeGen> funcStack;
@@ -44,7 +44,7 @@ namespace Zodiac {
 
         public CodeGenerator() {
             varTable = new Stack<Dictionary<string, ZOperand>>();
-            funcTable = new Dictionary<string, Dictionary<string, Type>>();
+            //typeMemberTable = new Dictionary<string, Dictionary<string, Type>>();
             typeTable = new Dictionary<string, Type>();
             typeStack = new Stack<TypeGen>();
             funcStack = new Stack<CodeGen>();
@@ -60,12 +60,12 @@ namespace Zodiac {
             exp = ag.ExpressionFactory;
             tm = ag.TypeMapper;
         }
-        /*
+        
         public void InitIO() {
-            IOClass = ag.Public.Class("IO");
-            funcTable["IO"] = new Dictionary<string, Type>();
-            funcTable["IO"]["write"] = typeof(void);
-
+            var IOClass = ag.Public.Class("IIOO");
+            //typeMemberTable["IIOO"] = new Dictionary<string, Type>();
+            //typeMemberTable["IIOO"]["write"] = typeof(void);
+            typeTable["IIOO"] = IOClass;
             CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
                 .Parameter(typeof(string), "arg");
             {
@@ -73,11 +73,12 @@ namespace Zodiac {
                 writeStrMethod.WriteLine(arg);
             }
 
-            CodeGen writeIntMethod = IOClass.Public.Method(typeof(void), "write")
+            CodeGen writeIntMethod = IOClass.Public.Method(typeof(int), "write")
              .Parameter(typeof(int), "arg");
             {
                 var arg = writeIntMethod.Arg("arg");
                 writeIntMethod.WriteLine(arg);
+                writeIntMethod.Return(arg);
             }
 
             CodeGen writeCharMethod = IOClass.Public.Method(typeof(void), "write")
@@ -87,11 +88,9 @@ namespace Zodiac {
                 writeCharMethod.WriteLine(arg);
             }
         }
-        */
-
         public void InitRequiredType()
         {
-            funcTable["long"] = new Dictionary<string, Type> { ["ToString"] = typeof(string) };
+            //typeMemberTable["long"] = new Dictionary<string, Type> { ["ToString"] = typeof(string) };
 
             typeTable.Add("long", typeof(int));
             typeTable.Add("real", typeof(double));
@@ -99,46 +98,41 @@ namespace Zodiac {
             typeTable.Add("list", typeof(MyList));
             typeTable.Add("char", typeof(char));
         }
-
         private void InitTypeMethod() {
             // take long as a method
         }
-
+        private void hehe(Operand v)
+        {
+            mainMethod.Local(v.Invoke("write", tm, 1));
+        }
         public void Generate(ParseTree parseTree) {
             if (parseTree == null) return;
 
             defaultClass = ag.Public.Class("Default");
             typeTable.Add("Default", defaultClass);
-            funcTable["Default"] = new Dictionary<string, Type>();
+            //typeMemberTable["Default"] = new Dictionary<string, Type>();
             mainMethod = defaultClass.Public.Static.Method(typeof(void), "Main");
 
             //generator stack
             typeStack.Push(defaultClass);
             funcStack.Push(mainMethod);
 
-            // InitIO();
+            InitIO();
             InitRequiredType();
             PushScope();
             AddParseNodeRec(parseTree.Root);
 
 
-
-            var v = GetVar("i").Operand;
-            //var s = varTable["j"].Operand.GetReturnType(tm);
-            mainMethod.Invoke(typeof(IO), "WriteLine", v);
-
-            var t = GetVar("j").Operand;
-            mainMethod.Invoke(typeof(IO), "WriteLine", t);
-            //mainMethod.Invoke(typeof(IO), "WriteLine", s);
+            var i = GetVar("i").Operand;
+            var j = GetVar("j").Operand;
+            mainMethod.Invoke(typeof(IO), "WriteLine", i);
+            mainMethod.Invoke(typeof(IO), "WriteLine", j);
 
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["i"].Operand);
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["j"].Operand);
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
         }
-
-
-
         private void AddParseNodeRec(ParseTreeNode node)
         {
             if (node == null) return;
@@ -178,8 +172,6 @@ namespace Zodiac {
         }
         private void ScopeBody(ParseTreeNode node)
         {
-            
-            
             if (node == null) return;
             BNF bnf = GetBNF(node);
             try {
@@ -220,11 +212,9 @@ namespace Zodiac {
                 case BNF.type_definition:
                     TypeDefinition(node);
                     return;
-
                 default:
                     break;
             }
-
             foreach (var child in node.ChildNodes)
                 FuncTypeDefinition(child);
         }
@@ -243,7 +233,6 @@ namespace Zodiac {
                 case BNF.access_statement:
                     AccessStatement(node);
                     return;
-
                 default:
                     break;
             }
@@ -316,11 +305,10 @@ namespace Zodiac {
             }
             return;
         }
-
         private void FunctionDefinition(ParseTreeNode node, bool isVirtual = false)
         {
             var funcIdt = GetTokenText( node.ChildNodes[1].ChildNodes[0].ChildNodes[1]);//function_identifier
-            if (funcIdt != "init")
+            if (funcIdt != "_init")
             {
                 NormalFunctionDefinition(node, funcIdt, isVirtual);
             }
@@ -329,7 +317,6 @@ namespace Zodiac {
                 ConstructorFunctionDefinition(node, isVirtual);
             }
         }
-
         private void NormalFunctionDefinition(ParseTreeNode node, string funcIdt, bool isVirtual)
         {
             //------------the owner of the fucntion
@@ -350,7 +337,7 @@ namespace Zodiac {
                 funcRetType = getType(retType);
             }
 
-            funcTable[ownerType.Name][funcIdt] = funcRetType;
+            //typeMemberTable[ownerType.Name][funcIdt] = funcRetType;
 
             var funcOpt = (Convert.ToInt32(isVirtual) << 1) + Convert.ToInt32(isStatic);
             MethodGen func;
@@ -405,19 +392,50 @@ namespace Zodiac {
             PopScope();
             funcStack.Pop();
         }
-
         private void ConstructorFunctionDefinition(ParseTreeNode node, bool isVirtual)
         {
+            TypeGen ownerType = typeStack.Peek();
 
+            ConstructorGen ctr = ownerType.Public.Constructor();
+
+            var paraBlockNode = node.ChildNodes[3].ChildNodes[0];
+            var paraSize = 0;
+            var paraNames = new List<string>();
+            var paraTypes = new List<string>();
+            if (paraBlockNode.ChildNodes.Count != 0)
+            {
+                var parasNode = paraBlockNode.ChildNodes[0];
+                paraSize = parasNode.ChildNodes.Count;
+                for (int i = 0; i < paraSize; i++)
+                {
+                    paraNames.Add(GetTokenText(parasNode.ChildNodes[i].ChildNodes[1].ChildNodes[0]));
+                    var typeStr = getTypeString(parasNode.ChildNodes[i].ChildNodes[3]);
+                    paraTypes.Add(typeStr);
+                    ctr = ctr.Parameter(getType(typeStr), paraNames[i]);
+                }
+
+            }
+
+            CodeGen code = ctr.GetCode();
+
+            funcStack.Push(code);
+            PushScope();
+            for (var i = 0; i < paraSize; i++)
+            {
+                var para = code.Arg(paraNames[i]);
+                AddVarToVarTable(paraNames[i], new ZOperand(para, paraTypes[i]));
+            }
+            var statementsNode = node.ChildNodes[3].ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes[0];
+            ScopeBody(statementsNode);
+            PopScope();
+            funcStack.Pop();
         }
-
         private string getTypeString(ParseTreeNode node)
         {
             if (node.ToString() != "required_type") return null;
             node = node.ChildNodes[0];
-            return node.ToString() == "simple_type" ? GetTokenText(node.ChildNodes[0]) : null;
+            return node.ToString() == "simple_type" ? GetTokenText(node.ChildNodes[0]) : GetTokenText(node);
         }
-
         private string getTypeString(Type type) //TODO => Type.Name ?? null; 
         {
             if (type == typeof(int))
@@ -430,9 +448,7 @@ namespace Zodiac {
                 return "bool";
             return type.Name;
         }
-
         private Type getType(string typeStr) => typeTable[typeStr];
-
         private void AssignmentStatement(ParseTreeNode node)
         {
             CodeGen ownerFunc = funcStack.Peek();
@@ -444,7 +460,6 @@ namespace Zodiac {
                 rightValue = Expression(node.ChildNodes[2].ChildNodes[0]);
             ownerFunc.Assign(leftValue.Operand, rightValue.Operand);
         }
-
         private void TypeDefinition(ParseTreeNode node) {
             // type init
             var isDerived = node.ChildNodes[2].ChildNodes.Count > 0;
@@ -461,7 +476,8 @@ namespace Zodiac {
             }
             typeTable.Add(typeName, thisType);
             typeStack.Push(thisType);
-            funcTable[typeName] = new Dictionary<string, Type>();
+            PushScope();
+            //typeMemberTable[typeName] = new Dictionary<string, Type>();
 
             var structured = node.ChildNodes[3];
             foreach (var member in structured.ChildNodes) {
@@ -474,7 +490,7 @@ namespace Zodiac {
                         break;
                 }
             }
-
+            PopScope();
             typeStack.Pop();
 
             //throw new NotImplementedException();
@@ -493,11 +509,12 @@ namespace Zodiac {
             var fieldIdt = GetTokenText(node.ChildNodes[1]);
             var member = ownerType.Public.Field(varType, fieldIdt);
             AddVarToVarTable(fieldIdt, new ZOperand(member, typeStr));
+            //typeMemberTable[ownerType.Name][fieldIdt] = varType;
         }
 
         private void AccessStatement(ParseTreeNode node)
         {
-            ZOperand ret = MemberAccess(node);
+            MemberAccess(node,true);
         }
 
 
@@ -580,9 +597,7 @@ namespace Zodiac {
 
                     oper = node.ChildNodes[0].ChildNodes[0].Token.Terminal.ToString();
                     return Compute(Expression(node.ChildNodes[1]), oper);
-
-
-
+                    
                 default:
 
                     if (node.ChildNodes.Count == 3)  //primmary_expression
@@ -597,13 +612,13 @@ namespace Zodiac {
 
         }
 
-        private ZOperand MemberAccess(ParseTreeNode node)
+        private ZOperand MemberAccess(ParseTreeNode node, bool isAccess = false)
         {
             CodeGen ownerFunc = funcStack.Peek();
             var mainAccessNode = node.ChildNodes[0];//what for member_access_with_segment?
             if (mainAccessNode.ToString() == "member_access")
             {
-                if (node.ChildNodes.Count == 1) return MemberAccess(mainAccessNode);
+                if (node.ChildNodes.Count == 1) return MemberAccess(mainAccessNode, isAccess);
                 var segment = node.ChildNodes[1].ChildNodes[0];
                 BnfTerm term = segment.Term;
                 BNF bnf = GetBNF(segment);
@@ -627,13 +642,24 @@ namespace Zodiac {
                                 else
                                 {
                                     ret = st.Invoke(tm.MapType(defaultClass), mainAccess.Name);
-                                    type = funcTable[defaultClass.Name][mainAccess.Name];
+                                    type = ret.GetReturnType(tm);
+                                    //type = typeMemberTable[defaultClass.Name][mainAccess.Name];
                                 }
                             }
                             else
                             {
-                                ret = mainAccess.Operand.Invoke(mainAccess.Name, tm);
-                                type = funcTable[mainAccess.Type][mainAccess.Name];
+                                if (isAccess)
+                                {
+                                    ownerFunc.Invoke(mainAccess.Operand, mainAccess.Name);
+                                    return null;
+                                }
+                                else
+                                {
+                                    ret = mainAccess.Operand.Invoke(mainAccess.Name, tm);
+                                    type = ret.GetReturnType(tm);
+                                    //Console.WriteLine(ret.GetReturnType(tm).Name);
+                                    //type = typeMemberTable[mainAccess.Type][mainAccess.Name];
+                                }
                             }
                         }
                         else
@@ -654,28 +680,38 @@ namespace Zodiac {
                                 else
                                 {
                                     ret = st.Invoke(tm.MapType(defaultClass), mainAccess.Name, paras);
-                                    type = funcTable[defaultClass.Name][mainAccess.Name];
+                                    type = ret.GetReturnType(tm);
+                                    //type = typeMemberTable[defaultClass.Name][mainAccess.Name];
                                 }
                             }
                             else
                             {
-                                ret = mainAccess.Operand.Invoke(mainAccess.Name, tm, paras);
-                                type = funcTable[mainAccess.Type][mainAccess.Name];
+                                if (isAccess)
+                                {
+                                    ownerFunc.Invoke(mainAccess.Operand, mainAccess.Name, paras);
+                                    return null;
+                                }
+                                else
+                                {
+                                    ret = mainAccess.Operand.Invoke(mainAccess.Name, tm, paras);
+                                    type = ret.GetReturnType(tm);
+                                    //type = typeMemberTable[mainAccess.Type][mainAccess.Name];
+                                }
                             }
 
                         }
                         return new ZOperand(ret, getTypeString(type));
-                    // break;
                     case BNF.array_indexer:
-                        mainAccess = MemberAccess(mainAccessNode);
+                        mainAccess = MemberAccess(mainAccessNode,false);
                         member = segment.ChildNodes[0];
                         var index = Expression(member);
                         return new ZOperand(mainAccess.Operand[tm, index.Operand], "char");
                     case BNF.dot:
-                        mainAccess = MemberAccess(mainAccessNode);
+                        mainAccess = MemberAccess(mainAccessNode,false);
                         member = node.ChildNodes[1].ChildNodes[1];
-                        string var = GetTokenText(member);
-                        break;
+                        string fieldStr = GetTokenText(member);
+                        var field = mainAccess.Operand.Field(fieldStr, tm);
+                        return new ZOperand(field, field.GetReturnType(tm).Name);
                 }
             }
             else
@@ -767,6 +803,10 @@ namespace Zodiac {
                 lineNumber = node.Token.Location.Line;
                 columnNumber = node.Token.Location.Column;
                 return node.Token.Text;
+            }
+            else if(node.ToString() == "required_type")
+            {
+                return GetTokenText(node.ChildNodes[0]);
             }
             else return null;
         }

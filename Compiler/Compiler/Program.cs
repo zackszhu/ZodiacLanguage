@@ -223,7 +223,7 @@ namespace Compiler {
 
             /* Basic */
             /* identifier */
-            identifier_ext.Rule = identifier | required_type | inherit_converter;  //??
+            identifier_ext.Rule = required_type | inherit_converter;  //??
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
@@ -248,7 +248,7 @@ namespace Compiler {
             /* Rule */
             /* 2 Type declarations and definitions */
             /* 2.1 Required-types */
-            required_type.Rule = simple_type | list_type /*| func_type*/;
+            required_type.Rule = identifier | simple_type | list_type /*| func_type*/;
             simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" | "IO";
             list_type.Rule = ToTerm("list");
             // func_type.Rule = ToTerm("func");
