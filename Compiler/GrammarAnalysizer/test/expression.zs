@@ -1,11 +1,11 @@
 type foo{
 
-    var i = long;
+	var i = long;
 
     func _init
-    {
+	{
         i = 100;
-    }   
+	}	
 }
 type bar <- foo{
 

@@ -2,7 +2,7 @@
 using System.Collections;
 
 namespace GrammarAnalysizer {
-    public class MyList {
+    public class MyList : IEnumerable{
         private ArrayList _elements = new ArrayList();
         private int _offset;
 
@@ -61,6 +61,10 @@ namespace GrammarAnalysizer {
             }
             str += "]";
             return str;
+        }
+
+        public IEnumerator GetEnumerator() {
+            return _elements.GetEnumerator();
         }
     }
 }
