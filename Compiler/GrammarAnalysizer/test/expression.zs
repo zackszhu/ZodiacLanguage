@@ -5,7 +5,7 @@ type foo{
     func _init
 	{
         i = 100;
-	}	
+	}
 }
 type bar <- foo{
 
@@ -15,7 +15,7 @@ type bar <- foo{
     {
         param xxoo = foo;
         j = xxoo.i;
-    }   
+    }
 
     func barbar : long {
         return j;
@@ -24,8 +24,10 @@ type bar <- foo{
 
 var f = foo();
 var b = bar(f);
-var i = ~111;
+var i = 1;
 var j = b.barbar();
+
+io.writeln(i);
 
 
 @@ ^^ 没实现

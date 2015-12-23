@@ -61,33 +61,33 @@ namespace Zodiac {
             tm = ag.TypeMapper;
         }
         
-        public void InitIO() {
-            var IOClass = ag.Public.Class("IIOO");
-            //typeMemberTable["IIOO"] = new Dictionary<string, Type>();
-            //typeMemberTable["IIOO"]["write"] = typeof(void);
-            typeTable["IIOO"] = IOClass;
-            CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
-                .Parameter(typeof(string), "arg");
-            {
-                var arg = writeStrMethod.Arg("arg");
-                writeStrMethod.WriteLine(arg);
-            }
+        //public void InitIO() {
+        //    var IOClass = ag.Public.Class("IIOO");
+        //    //typeMemberTable["IIOO"] = new Dictionary<string, Type>();
+        //    //typeMemberTable["IIOO"]["write"] = typeof(void);
+        //    typeTable["IIOO"] = IOClass;
+        //    CodeGen writeStrMethod = IOClass.Public.Method(typeof(void), "write")
+        //        .Parameter(typeof(string), "arg");
+        //    {
+        //        var arg = writeStrMethod.Arg("arg");
+        //        writeStrMethod.WriteLine(arg);
+        //    }
 
-            CodeGen writeIntMethod = IOClass.Public.Method(typeof(int), "write")
-             .Parameter(typeof(int), "arg");
-            {
-                var arg = writeIntMethod.Arg("arg");
-                writeIntMethod.WriteLine(arg);
-                writeIntMethod.Return(arg);
-            }
+        //    CodeGen writeIntMethod = IOClass.Public.Method(typeof(int), "write")
+        //     .Parameter(typeof(int), "arg");
+        //    {
+        //        var arg = writeIntMethod.Arg("arg");
+        //        writeIntMethod.WriteLine(arg);
+        //        writeIntMethod.Return(arg);
+        //    }
 
-            CodeGen writeCharMethod = IOClass.Public.Method(typeof(void), "write")
-             .Parameter(typeof(char), "arg");
-            {
-                var arg = writeCharMethod.Arg("arg");
-                writeCharMethod.WriteLine(arg);
-            }
-        }
+        //    CodeGen writeCharMethod = IOClass.Public.Method(typeof(void), "write")
+        //     .Parameter(typeof(char), "arg");
+        //    {
+        //        var arg = writeCharMethod.Arg("arg");
+        //        writeCharMethod.WriteLine(arg);
+        //    }
+        //}
         public void InitRequiredType()
         {
             //typeMemberTable["long"] = new Dictionary<string, Type> { ["ToString"] = typeof(string) };
@@ -97,14 +97,12 @@ namespace Zodiac {
             typeTable.Add("bool", typeof(bool));
             typeTable.Add("list", typeof(MyList));
             typeTable.Add("char", typeof(char));
+            typeTable.Add("IO", typeof(IO));
         }
         private void InitTypeMethod() {
             // take long as a method
         }
-        private void hehe(Operand v)
-        {
-            mainMethod.Local(v.Invoke("write", tm, 1));
-        }
+
         public void Generate(ParseTree parseTree) {
             if (parseTree == null) return;
 
@@ -117,16 +115,18 @@ namespace Zodiac {
             typeStack.Push(defaultClass);
             funcStack.Push(mainMethod);
 
-            InitIO();
+            //InitIO();
             InitRequiredType();
             PushScope();
+            var ioOperand = mainMethod.Local(exp.New(typeTable["IO"]));
+            AddVarToVarTable("io", new ZOperand(ioOperand, "IO"));
             AddParseNodeRec(parseTree.Root);
 
 
             var i = GetVar("i").Operand;
             var j = GetVar("j").Operand;
-            mainMethod.Invoke(typeof(IO), "WriteLine", i);
-            mainMethod.Invoke(typeof(IO), "WriteLine", j);
+            //mainMethod.Invoke(typeof(IO), "WriteLine", i);
+            //mainMethod.Invoke(typeof(IO), "WriteLine", j);
 
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["i"].Operand);
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["j"].Operand);

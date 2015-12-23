@@ -2,8 +2,12 @@
 
 namespace GrammarAnalysizer {
     public class IO {
-        public static void WriteLine(object arg) {
+        public void writeln(object arg) {
             Console.WriteLine(arg.ToString());
+        }
+
+        public int readln() {
+            return int.Parse(s: Console.ReadLine());
         }
     }
 }
