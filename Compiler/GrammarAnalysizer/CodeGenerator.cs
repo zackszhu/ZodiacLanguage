@@ -123,10 +123,10 @@ namespace Zodiac {
             AddParseNodeRec(parseTree.Root);
 
 
-            var i = GetVar("i").Operand;
-            var j = GetVar("j").Operand;
-            //mainMethod.Invoke(typeof(IO), "WriteLine", i);
-            //mainMethod.Invoke(typeof(IO), "WriteLine", j);
+            //var i = GetVar("i").Operand;
+            //var j = GetVar("j").Operand;
+            //mainMethod.Invoke(typeof(IO), "writeln", i);
+            //mainMethod.Invoke(typeof(IO), "writeln", j);
 
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["i"].Operand);
             //mainMethod.Invoke(typeof(IO), "WriteLine", varTable["j"].Operand);
@@ -634,7 +634,17 @@ namespace Zodiac {
                         {
                             if (mainAccess.Operand as Object == null)
                             {
-                                if (typeTable.ContainsKey(mainAccess.Name))
+                                if (mainAccess.Type != null) {
+                                    if (isAccess) {
+                                        ownerFunc.Invoke(typeTable[mainAccess.Type], mainAccess.Name);
+                                        return null;
+                                    }
+                                    else {
+                                        ret = st.Invoke(tm.MapType(typeTable[mainAccess.Type]), mainAccess.Name);
+                                        type = ret.GetReturnType(tm);
+                                    }
+                                }
+                                else if (typeTable.ContainsKey(mainAccess.Name))
                                 {
                                     type = typeTable[mainAccess.Name];
                                     ret = ownerFunc.Local(exp.New(type));
@@ -672,7 +682,17 @@ namespace Zodiac {
                             }
                             if (mainAccess.Operand as Object == null)
                             {
-                                if (typeTable.ContainsKey(mainAccess.Name))
+                                if (mainAccess.Type != null) {
+                                    if (isAccess) {
+                                        ownerFunc.Invoke(typeTable[mainAccess.Type], mainAccess.Name, paras);
+                                        return null;
+                                    }
+                                    else {
+                                        ret = st.Invoke(tm.MapType(typeTable[mainAccess.Type]), mainAccess.Name, paras);
+                                        type = ret.GetReturnType(tm);
+                                    }
+                                }
+                                else if (typeTable.ContainsKey(mainAccess.Name))
                                 {
                                     type = typeTable[mainAccess.Name];
                                     ret = ownerFunc.Local(exp.New(type, paras));
@@ -859,6 +879,9 @@ namespace Zodiac {
         {
             //ZOperand ret;
             //bool find = false;
+            if (typeTable.ContainsKey(varName)) {
+                return new ZOperand(null, typeTable[varName].Name);
+            }
             foreach(var scope in varTable)
             {
                 if (scope.ContainsKey(varName))

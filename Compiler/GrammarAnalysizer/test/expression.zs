@@ -28,7 +28,7 @@ var b = bar(f);
 var i = 1;
 var j = b.barbar();
 }@
-IO.writeln(i);
+IO.writeln(5);
 
 
 @@ ^^ 没实现
