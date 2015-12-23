@@ -1,15 +1,23 @@
+type s{
 
-func ok : long
+	var i = long;
+
+	func ok : long
 	{
-    	param i = long;
+    	param ii = long;
     	param j = long;
-    	return i + j;
-	}
+
+    	i = ii;
+    	return i;
+	}	
+}
 
 
 
 
+
+var ss = s();
 var i = ~111;
-var j = 44 + 99 / 66  * 55 + ok(11,22);
+var j = 44 + 99 / 66  * 55 + ss.ok(33, 2);
 
 @@ ^^ 没实现
