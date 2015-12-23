@@ -1,35 +1,34 @@
+@{
+type foo{
 
+	var i = long;
 
-type s
-{
-	var k = long;
-	var l = long;
-	func ok : long
+    func _init
 	{
-    	param x = long;
-    	param y = long;
-    	k = x + y;
-    	l = x - y ;
-    	return k;
+        i = 100;
 	}
+}
+type bar <- foo{
 
-	oper + : long
-	{
-		param x = s;
-		param y = s;
+    var j = long;
 
-		return x.k + y.k;
-	}	
+    func _init
+    {
+        param xxoo = foo;
+        j = xxoo.i;
+    }
 
+    func barbar : long {
+        return j;
+    }
 }
 
+var f = foo();
+var b = bar(f);
+var i = 1;
+var j = b.barbar();
+}@
+IO.writeln(5);
 
-
-
-
-var ss = s();
-
-var j = 44 + 99 / 66  * 55 + ss.ok(33, 2);
-var i = ss + ss;
 
 @@ ^^ 没实现

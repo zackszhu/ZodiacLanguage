@@ -45,7 +45,6 @@ namespace Compiler {
             var required_type = new NonTerminal("required_type");
             var simple_type = new NonTerminal("simple_type");
             var list_type = new NonTerminal("list_type");
-            var user_type = new NonTerminal("user_type");
             //  var func_type = new NonTerminal("func_type");
             //var type_declaration = new NonTerminal("type_declaration");
             var type_definition = new NonTerminal("type_definition");
@@ -56,7 +55,6 @@ namespace Compiler {
             var member_variable = new NonTerminal("member_variable");
             var member_function = new NonTerminal("member_function");
             var member_family_opt = new NonTerminal("family option");
-            
 
             /* 3 Constructors and Convertor */
             var constructor = new NonTerminal("constructor");
@@ -250,10 +248,9 @@ namespace Compiler {
             /* Rule */
             /* 2 Type declarations and definitions */
             /* 2.1 Required-types */
-            required_type.Rule = simple_type | list_type | identifier/*| func_type*/;
-            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" | "IO";
+            required_type.Rule = identifier | simple_type | list_type /*| func_type*/;
+            simple_type.Rule = ToTerm("long") | "real" | "bool" | "char" ;
             list_type.Rule = ToTerm("list");
-            user_type.Rule = identifier;
             // func_type.Rule = ToTerm("func");
 
             /* 2.1 Type-declarations */
@@ -331,7 +328,6 @@ namespace Compiler {
             function_parameter_block.Rule = function_parameter_list | function_parameter_default_list | (function_parameter_list + function_parameter_default_list) | Empty;
             //function_parameter_list_opt.Rule = function_parameter_list | Empty;
             function_parameter_list.Rule = MakePlusRule(function_parameter_list, null, function_parameter);
-
             function_parameter.Rule = "param" + identifier_list + assignment_operator + required_type + semi;
             //function_parameter_default_list_opt.Rule = function_parameter_default_list | Empty;
             function_parameter_default_list.Rule = MakePlusRule(function_parameter_default_list, null, function_parameter_default);
@@ -432,8 +428,8 @@ namespace Compiler {
 
             #region Define_Keywords
 
-            this.MarkReservedWords("IO", "long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
-                , "False", "if", "else", "for in", "while", "break", "continue", "from", "where", "select", "ance", "desc", "IO", "have", "Null");
+            this.MarkReservedWords("long", "real", "char", "bool", "list", "func", "oper", "var", "param", "return", "escape", "type", "family", "static", "True"
+                , "False", "if", "else", "for in", "while", "break", "continue", "from", "where", "select", "ance", "desc", "have", "Null");
 
             #endregion
         }
