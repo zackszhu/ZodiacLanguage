@@ -30,6 +30,7 @@ namespace Compiler {
             KeyTerm semi = ToTerm(";", "semi");
             KeyTerm dot = ToTerm(".", "dot");
             KeyTerm comma = ToTerm(",", "comma");
+            KeyTerm cast = ToTerm("=>", "cast");
             KeyTerm Lbr = ToTerm("{");
             KeyTerm Rbr = ToTerm("}");
             KeyTerm Lbra = ToTerm("[");
@@ -233,6 +234,7 @@ namespace Compiler {
             
             member_access_segments_opt.Rule = member_access_segment | Empty;//MakeStarRule(member_access_segments_opt, null, member_access_segment);
             member_access_segment.Rule = (dot + identifier)
+                                       | (cast + required_type)
                                        | array_indexer
                                        | argument_list_par;
 

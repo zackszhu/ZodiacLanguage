@@ -6,7 +6,7 @@
    <Modules>
     <Module Name="zodiac.dll">
      <Messages>
-      <Message TypeName="MarkAssembliesWithAssemblyVersion" Category="Microsoft.Design" CheckId="CA1016" Status="Active" Created="2015-12-24 02:23:24Z" FixCategory="NonBreaking">
+      <Message TypeName="MarkAssembliesWithAssemblyVersion" Category="Microsoft.Design" CheckId="CA1016" Status="Active" Created="2015-12-24 03:39:08Z" FixCategory="NonBreaking">
        <Issue Certainty="95" Level="Error">向 'Zodiac.dll' 中添加 AssemblyVersion 特性。</Issue>
       </Message>
      </Messages>
@@ -15,7 +15,7 @@
        <Types>
         <Type Name="ZodiacGrammar" Kind="Class" Accessibility="Public" ExternallyVisible="True">
          <Messages>
-          <Message TypeName="ComVisibleTypeBaseTypesShouldBeComVisible" Category="Microsoft.Interoperability" CheckId="CA1405" Status="Active" Created="2015-12-24 02:23:24Z" FixCategory="DependsOnFix">
+          <Message TypeName="ComVisibleTypeBaseTypesShouldBeComVisible" Category="Microsoft.Interoperability" CheckId="CA1405" Status="Active" Created="2015-12-24 03:39:08Z" FixCategory="DependsOnFix">
            <Issue Certainty="90" Level="Error">'ZodiacGrammar' 被标记为 ComVisible(true)，但在其对象层次结构中具有下列 ComVisible(false) 类型: 'Grammar'</Issue>
           </Message>
          </Messages>
