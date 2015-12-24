@@ -7,7 +7,8 @@ namespace GrammarAnalysizer {
         }
 
         public static int readln() {
-            return int.Parse(s: Console.ReadLine());
+            var s = Console.ReadLine();
+            return int.Parse(s);
         }
     }
 }

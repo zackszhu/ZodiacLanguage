@@ -97,7 +97,7 @@ namespace Zodiac {
             typeTable.Add("long", typeof(int));
             typeTable.Add("real", typeof(double));
             typeTable.Add("bool", typeof(bool));
-            typeTable.Add("list", typeof(MyList));
+            typeTable.Add("list", typeof(list));
             typeTable.Add("char", typeof(char));
             typeTable.Add("IO", typeof(IO));
         }
