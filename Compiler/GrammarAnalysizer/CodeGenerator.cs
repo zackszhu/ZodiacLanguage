@@ -189,7 +189,7 @@ namespace Zodiac {
             
             if (node == null) return;
             BNF bnf = GetBNF(node);
-            //try {
+            try {
                 switch (bnf)
                 {
                     case BNF.simple_statement:
@@ -215,12 +215,12 @@ namespace Zodiac {
                             ScopeBody(child);
                         break;
                 }
-         /* }
+          }
            catch (Exception e)
             {
                 GeneratedOK = false;
                 Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
-           }*/
+           }
         }
 
         private void ContinueStatement() {
@@ -392,7 +392,7 @@ namespace Zodiac {
             }
             return;
         }
-        private void FunctionDefinition(ParseTreeNode node, bool isVirtual = false)
+        private void FunctionDefinition(ParseTreeNode node, bool isVirtual = false, bool isDerived = false)
         {
             var functype = GetTokenText(node.ChildNodes[1].ChildNodes[0].ChildNodes[0]);
 
@@ -405,7 +405,7 @@ namespace Zodiac {
             }
             else if (funcIdt != "_init")
             {
-                NormalFunctionDefinition(node, funcIdt, isVirtual);
+                NormalFunctionDefinition(node, funcIdt, isVirtual, isDerived);
             }
             else
             {
@@ -489,7 +489,7 @@ namespace Zodiac {
 
         }
 
-        private void NormalFunctionDefinition(ParseTreeNode node, string funcIdt, bool isVirtual)
+        private void NormalFunctionDefinition(ParseTreeNode node, string funcIdt, bool isVirtual = false, bool isDerived = false)
         {
             //------------the owner of the fucntion
             TypeGen ownerType = typeStack.Peek();
@@ -524,7 +524,10 @@ namespace Zodiac {
                     func = ownerType.Public.Static.Method(funcRetType, funcIdt);
                     break;
                 case 2:
-                    func = ownerType.Public.Virtual.Method(funcRetType, funcIdt);
+                    if (isDerived)
+                        func = ownerType.Public.Override.Method(funcRetType, funcIdt);
+                    else
+                        func = ownerType.Public.Virtual.Method(funcRetType, funcIdt);
                     break;
                 case 3:
                     func = ownerType.Public.Virtual.Static.Method(funcRetType, funcIdt);
@@ -665,7 +668,7 @@ namespace Zodiac {
                         TypeMemVarDef(member.ChildNodes[0]);
                         break;
                     case "member_function":
-                        TypeMemFuncDef(member.ChildNodes[0]);
+                        TypeMemFuncDef(member.ChildNodes[0], isDerived);
                         break;
                 }
             }
@@ -675,9 +678,9 @@ namespace Zodiac {
             //throw new NotImplementedException();
         }
 
-        private void TypeMemFuncDef(ParseTreeNode node) {
+        private void TypeMemFuncDef(ParseTreeNode node, bool isDerived) {
             var isVirtual = node.ChildNodes[0].ChildNodes.Count == 1;
-            FunctionDefinition(node.ChildNodes[1], isVirtual);
+            FunctionDefinition(node.ChildNodes[1], isVirtual, isDerived);
             //throw new NotImplementedException();
         }
 

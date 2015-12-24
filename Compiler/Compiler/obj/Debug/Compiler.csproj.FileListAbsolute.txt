@@ -52,3 +52,4 @@ E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Zodiac.dll
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Zodiac.pdb
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Zodiac.dll.CodeAnalysisLog.xml
 E:\OneDrive\Sjtu\SE\SE302_Compile\ZodiacLanguage\Compiler\Zodiac.dll.lastcodeanalysissucceeded
+E:\Code\CSharp\compile\ZodiacLanguage\Compiler\Compiler\obj\Debug\Compiler.csprojResolveAssemblyReference.cache
