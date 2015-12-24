@@ -21,15 +21,15 @@ namespace GrammarAnalysizer {
 
         public list(int start, int end) {
             _elements = new ArrayList();
-            for (var i = start; i <= end; i++) {//hehe////////    //        //      ////////////    //        //      ////////////      //
-                _elements.Add(i);                           //    //        //      //              //        //      //                //
-            }                                               //    //        //      //              //        //      //                //
-            ElmtType = typeof (int);                        //    //        //      //              //        //      //                //
-        }                                                   //    ////////////      ////////////    ////////////      ////////////      //
-                                                            //    //        //      //              //        //      //                //
-        public list(int start, int end, object value) {     //    //        //      //              //        //      //
-            _offset = start;                                //    //        //      //              //        //      //                //
-            for (var i = 0; i <= end - start; i++) {  //hehe//    //        //      ////////////    //        //      ////////////      //
+            for (var i = start; i <= end; i++) {
+                _elements.Add(i);               
+            }                                   
+            ElmtType = typeof (int);            
+        }                                       
+                                                
+        public list(int start, int end, object value) {     
+            _offset = start;                                
+            for (var i = 0; i <= end - start; i++) {  
                 _elements.Add(value);
             }
             ElmtType = value.GetType();

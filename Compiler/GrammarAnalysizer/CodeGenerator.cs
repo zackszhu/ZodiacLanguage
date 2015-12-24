@@ -200,6 +200,8 @@ namespace Zodiac {
                         RetStatement(node);
                         return;
                     default:
+                        foreach (var child in node.ChildNodes)
+                            ScopeBody(child);
                         break;
                 }
           }
@@ -208,8 +210,6 @@ namespace Zodiac {
                 GeneratedOK = false;
                 Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
            }
-            foreach (var child in node.ChildNodes)
-                ScopeBody(child);
         }
         private void FuncTypeDefinition(ParseTreeNode node)
         {
@@ -275,6 +275,8 @@ namespace Zodiac {
             var ownerFunc = funcStack.Peek();
             ownerFunc.If(Expression(node.ChildNodes[1]).Operand);
             ScopeBody(node.ChildNodes[2]);
+            ownerFunc.Else();
+            ScopeBody(node.ChildNodes[3]);
             ownerFunc.End();
         }
 
