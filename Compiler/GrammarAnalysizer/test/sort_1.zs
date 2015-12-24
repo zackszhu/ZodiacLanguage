@@ -59,6 +59,4 @@ func qsort2 : list
             select item);
 }
         
-
-@@IO.writeln(qsort([6,2,7,2,1,3,9,30,19,4,100,4,12]));
 IO.writeln(qsort2([6,2,7,2,1,3,9,30,19,4,100,4,12]));

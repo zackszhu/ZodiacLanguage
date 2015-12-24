@@ -58,9 +58,9 @@ namespace GrammarAnalysizer {
                 _elements = new List<int>(l1._elements),
                 _offset = l1._offset
             };
-            Console.Write(l1.ToString() + "+"  +l2.ToString() + "=" );
+            //Console.Write(l1.ToString() + "+"  +l2.ToString() + "=" );
             ret._elements.AddRange(l2._elements);
-            Console.WriteLine(ret);
+           // Console.WriteLine(ret);
             return ret;
         }
 
