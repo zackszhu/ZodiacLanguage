@@ -130,7 +130,6 @@ namespace Zodiac {
             //AddVarToVarTable("io", new ZOperand(ioOperand, "IO"));
             AddParseNodeRec(parseTree.Root);
 
-
             //var i = GetVar("i").Operand;
             //var j = GetVar("j").Operand;
             //mainMethod.Invoke(typeof(IO), "writeln", i);
@@ -918,36 +917,49 @@ namespace Zodiac {
                 BNF bnf = GetBNF(segment);
                 ParseTreeNode member;
                 ZOperand mainAccess;
+                Operand ret;
+                Type type;
                 switch (bnf) {
                     case BNF.argument_list_par:
                         mainAccess = FunctionAccess(mainAccessNode);
                         member = segment.ChildNodes[0];
-                        Operand ret;
-                        Type type;
+                        //func()
                         if (member.ChildNodes.Count == 0)
                         {
                             if (mainAccess.Operand as Object == null)
                             {
-                                if (mainAccess.Type != null) {
-                                    if (isAccess) {
-                                        ownerFunc.Invoke(typeTable[mainAccess.Type], mainAccess.Name);
-                                        return null;
-                                    }
-                                    else {
-                                        ret = st.Invoke(tm.MapType(typeTable[mainAccess.Type]), mainAccess.Name);
-                                        type = ret.GetReturnType(tm);
-                                    }
-                                }
-                                else if (typeTable.ContainsKey(mainAccess.Name))
+                                //var i = foo();
+                                if (typeTable.ContainsKey(mainAccess.Name))
                                 {
                                     type = typeTable[mainAccess.Name];
                                     ret = ownerFunc.Local(exp.New(type));
                                 }
+
+                                // func();
+                                else if (isAccess)
+                                {
+                                    try
+                                    {
+                                        ownerFunc.Invoke(typeTable[mainAccess.Type], mainAccess.Name);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        ownerFunc.Invoke(ownerFunc.This(), mainAccess.Name);
+                                    }
+                                    return null;
+                                }
+                                //i = func()
                                 else
                                 {
-                                    ret = st.Invoke(tm.MapType(defaultClass), mainAccess.Name);
+                                    try
+                                    {
+                                        ret = st.Invoke(typeTable[mainAccess.Type], mainAccess.Name);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        ret = ownerFunc.This().Invoke(mainAccess.Name);
+                                    }
                                     type = ret.GetReturnType(tm);
-                                    //type = typeMemberTable[defaultClass.Name][mainAccess.Name];
                                 }
                             }
                             else
@@ -959,13 +971,12 @@ namespace Zodiac {
                                 }
                                 else
                                 {
-                                ret = mainAccess.Operand.Invoke(mainAccess.Name, tm);
+                                    ret = mainAccess.Operand.Invoke(mainAccess.Name, tm);
                                     type = ret.GetReturnType(tm);
-                                    //Console.WriteLine(ret.GetReturnType(tm).Name);
-                                    //type = typeMemberTable[mainAccess.Type][mainAccess.Name];
+                                }
                             }
                         }
-                        }
+                        //func(paras)
                         else
                         {
                             var paraSize = member.ChildNodes[0].ChildNodes.Count;
@@ -976,26 +987,34 @@ namespace Zodiac {
                             }
                             if (mainAccess.Operand as Object == null)
                             {
-                                if (mainAccess.Type != null) {
-                                    if (isAccess) {
-                                        ownerFunc.Invoke(typeTable[mainAccess.Type], mainAccess.Name, paras);
-                                        return null;
-                                    }
-                                    else {
-                                        ret = st.Invoke(tm.MapType(typeTable[mainAccess.Type]), mainAccess.Name, paras);
-                                        type = ret.GetReturnType(tm);
-                                    }
-                                }
-                                else if (typeTable.ContainsKey(mainAccess.Name))
+                                if (typeTable.ContainsKey(mainAccess.Name))
                                 {
                                     type = typeTable[mainAccess.Name];
                                     ret = ownerFunc.Local(exp.New(type, paras));
                                 }
+                                else if (isAccess)
+                                {
+                                    try
+                                    {
+                                        ownerFunc.Invoke(typeTable[mainAccess.Type], mainAccess.Name, paras);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        ownerFunc.Invoke(ownerFunc.This(), mainAccess.Name, paras);
+                                    }
+                                    return null;
+                                }
                                 else
                                 {
-                                    ret = st.Invoke(tm.MapType(defaultClass), mainAccess.Name, paras);
+                                    try
+                                    {
+                                        ret = st.Invoke(typeTable[mainAccess.Type], mainAccess.Name, paras);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        ret = ownerFunc.This().Invoke(mainAccess.Name, paras);
+                                    }
                                     type = ret.GetReturnType(tm);
-                                    //type = typeMemberTable[defaultClass.Name][mainAccess.Name];
                                 }
                             }
                             else
@@ -1007,12 +1026,10 @@ namespace Zodiac {
                                 }
                                 else
                                 {
-                                ret = mainAccess.Operand.Invoke(mainAccess.Name, tm, paras);
+                                    ret = mainAccess.Operand.Invoke(mainAccess.Name, tm, paras);
                                     type = ret.GetReturnType(tm);
-                                    //type = typeMemberTable[mainAccess.Type][mainAccess.Name];
+                                }
                             }
-                            }
-
                         }
                         return new ZOperand(ret, getTypeString(type));
                     case BNF.array_indexer:
@@ -1026,6 +1043,12 @@ namespace Zodiac {
                         string fieldStr = GetTokenText(member);
                         var field = mainAccess.Operand.Field(fieldStr, tm);
                         return new ZOperand(field, field.GetReturnType(tm).Name);
+                    case BNF.cast:
+                        mainAccess = MemberAccess(mainAccessNode, false);
+                        member = node.ChildNodes[1].ChildNodes[1];
+                        var dstTypeStr = GetTokenText(member);
+                        ret = mainAccess.Operand.Cast(typeTable[dstTypeStr]);
+                        return new ZOperand(ret, ret.GetReturnType(tm).Name);
                 }
             }
             else
@@ -1087,7 +1110,7 @@ namespace Zodiac {
                 }
                 else
                 {
-                    return new ZOperand(null, null, idtExt);
+                    return new ZOperand(null, typeStack.Peek().Name, idtExt);
                 }
             }
 
@@ -1191,6 +1214,9 @@ namespace Zodiac {
                     return scope[varName];
                 }
             }
+            var ownerFunc = funcStack.Peek();
+            var field = ownerFunc.This().Field(varName);
+            return new ZOperand(field, field.GetReturnType(tm).Name);
             throw new Exception("Var: " + varName + " can not be found!");
         }
 
@@ -1298,6 +1324,7 @@ namespace Zodiac {
             argument_list,
             array_indexer,
             dot,
+            cast,
             function_definition,
             definition,
             ret_statement,
