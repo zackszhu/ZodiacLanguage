@@ -728,6 +728,8 @@ namespace Zodiac {
                     return Operator.LeftShift;
                 case "&":
                     return Operator.And;
+                case "|":
+                    return Operator.Or;
                 case "^":
                     return Operator.Xor;
                 case "&&":   //attention
@@ -787,25 +789,27 @@ namespace Zodiac {
                     case "<<":
                         return leftValue.LeftShift(rightValue);
                     case "&":
-                        return leftValue & rightValue;
+                        return leftValue.BitwiseOr(rightValue);
+                    case "|":
+                        return leftValue.BitwiseOr(rightValue);
                     case "^":
-                        return leftValue ^ rightValue;
+                        return leftValue.Xor(rightValue);
                     case "&&":
-                        return leftValue && rightValue;
+                        return leftValue.LogicalAnd(rightValue);
                     case "||":
-                        return leftValue || rightValue;
+                        return leftValue.LogicalOr(rightValue);
                     case ">":
-                        return leftValue > rightValue;
+                        return leftValue.Gt(rightValue);
                     case "<":
-                        return leftValue < rightValue;
+                        return leftValue.Lt(rightValue);
                     case ">=":
-                        return leftValue >= rightValue;
+                        return leftValue.Ge(rightValue);
                     case "<=":
-                        return leftValue <= rightValue;
+                        return leftValue.Le(rightValue);
                     case "==":
-                        return leftValue == rightValue;
+                        return leftValue.Eq(rightValue);
                     case "!=":
-                        return leftValue != rightValue;
+                        return leftValue.Ne(rightValue);
                     case "^^":
                         throw new Exception("operator " + oper + "not implemented");
                     default:
@@ -1178,7 +1182,7 @@ namespace Zodiac {
         private ZOperand ListNormalExpression(ParseTreeNode node)
         {
             var ownerFunc = funcStack.Peek();
-            var result =  ownerFunc.Local(typeof(list));
+            var result = ownerFunc.Local(exp.New(typeof(list)));
             //expression_list add one by one
             var expression_list = node.ChildNodes[0];
             if (expression_list == null) throw new Exception("invalid list normal Expression");
@@ -1188,14 +1192,31 @@ namespace Zodiac {
 
                 if (temp.GetReturnType(tm) != typeof(int))
                     throw new Exception("type of list element must be long");
-                result.Invoke("Append",temp);
+                ownerFunc.Invoke(result,"Append",temp);
+                //result.Invoke("Append",temp);
             }
-            return new ZOperand(result,"list",null);
+            return new ZOperand(result,"list");
         }
+
 
         private ZOperand listSelectExpression(ParseTreeNode node)
         {
-            
+
+            var ownerFunc = funcStack.Peek();
+            PushScope();
+            string itemName = GetTokenText(node.ChildNodes[1]); //11
+            var result = ownerFunc.Local(exp.New(typeof(list)));
+           
+            var item = ownerFunc.ForEach(typeof(int), Expression(node.ChildNodes[3]).Operand);
+            AddVarToVarTable(itemName, new ZOperand(item, getTypeString(item.GetReturnType(tm)) ));
+
+            ownerFunc.If(Expression(node.ChildNodes[5]).Operand);
+            ownerFunc.Invoke(result, "Append", item);
+            ownerFunc.End(); //end for if 
+            ownerFunc.End(); //end for end
+            //var item = 
+            PopScope();
+            return new ZOperand(result, "list");
         }
 
         private ZOperand ListStringExpression(ParseTreeNode node)

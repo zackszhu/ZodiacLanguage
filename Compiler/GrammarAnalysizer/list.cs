@@ -7,7 +7,11 @@ namespace GrammarAnalysizer {
         private List<int> _elements = new List<int>();
         private int _offset;
 
-        public int Length => _elements.Count;
+        //public int Length => _elements.Count;
+        public int Length ()
+        {
+            return _elements.Count;
+        }
 
         public int this[int index] {
             get { return _elements[index - _offset]; }

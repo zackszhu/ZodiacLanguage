@@ -342,8 +342,8 @@ namespace Compiler {
                 bin_operator;
             unary_operator.Rule = ToTerm("!") | "~" | "+" | "-";
 
-            bin_operator.Rule = ToTerm("^^") | "*" | "/" | "%" | "+" | "-" | "<<" | ">>" | "<" | ">" | "==" | "&"
-                | "^" | "|" | "&&" | "||";
+            bin_operator.Rule = ToTerm("*") | "/" | "%" | "+" | "-" | "<<" | ">>" | "<" | ">" | "==" | "&"
+                | "^" | "|" | "&&" | "||" | "<=" | ">=";
 
             assignment_value_operator.Rule = ToTerm(":=");
             assignment_reference_operator.Rule = ToTerm("=");
