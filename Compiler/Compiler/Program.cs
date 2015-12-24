@@ -141,7 +141,7 @@ namespace Compiler {
             var unary_expression = new NonTerminal("unary_expression");
             var primary_expression = new NonTerminal("primary_expression");
             var list_expression = new NonTerminal("list_expression");
-            var list_subscript_expression = new NonTerminal("list_subscript_expression");
+           // var list_subscript_expression = new NonTerminal("list_subscript_expression");
             var list_normal_expression = new NonTerminal("list_normal_expression");
             var list_select_expression = new NonTerminal("list_select_expression");
             var list_string_expression = new NonTerminal("list_string_expression");
@@ -223,7 +223,7 @@ namespace Compiler {
 
             /* Basic */
             /* identifier */
-            identifier_ext.Rule = required_type | inherit_converter;  //??
+            identifier_ext.Rule = required_type;  //??
             identifier_list.Rule = MakePlusRule(identifier_list, comma, identifier);
             /* member_access*/
             member_access_list.Rule = MakePlusRule(member_access, comma, member_access);
@@ -355,13 +355,13 @@ namespace Compiler {
             parenthesized_expression.Rule = Lpar + expression + Rpar;
             bin_op_expression.Rule = expression + bin_operator + expression;
             unary_expression.Rule = unary_operator + primary_expression;
-            list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression | list_subscript_expression;
+            list_expression.Rule = list_normal_expression | list_select_expression | list_string_expression;
 
             
             list_normal_expression.Rule = ToTerm("[") + expression_list + "]";
-            list_subscript_expression.Rule = ToTerm("List") + "[" + expression + comma + expression + "]" + "(" + expression + ")";
-            list_select_expression.Rule = ToTerm("from") + identifier + "in" + expression + "where" + expression + ToTerm("select") + identifier;
-            list_string_expression.Rule = ToTerm("\"") + stringLiteral + "\"";
+            //list_subscript_expression.Rule = ToTerm("List") + "[" + expression + comma + expression + "]" + "(" + expression + ")";
+            list_select_expression.Rule = ToTerm("from") + identifier + "in" + expression + "where" + expression + ToTerm("select") + expression;
+            list_string_expression.Rule = stringLiteral;
 
             primary_expression.Rule = literal
                 | unary_expression
@@ -369,7 +369,7 @@ namespace Compiler {
                 | member_access
                 | list_expression;
 
-            literal.Rule = number | stringLiteral | charLiteral | "True" | "False" | "Null";
+            literal.Rule = number | charLiteral | "True" | "False" | "Null";
 
             expression_list.Rule = MakePlusRule(expression_list, comma, expression);
 
