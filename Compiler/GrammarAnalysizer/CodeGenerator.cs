@@ -184,7 +184,7 @@ namespace Zodiac {
             
             if (node == null) return;
             BNF bnf = GetBNF(node);
-            //try {
+            try {
                 switch (bnf)
                 {
                     case BNF.simple_statement:
@@ -202,12 +202,12 @@ namespace Zodiac {
                     default:
                         break;
                 }
-         //   }
-           // catch (Exception e)
-           // {
-            //    GeneratedOK = false;
-            //    Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
-          //  }
+          }
+           catch (Exception e)
+            {
+                GeneratedOK = false;
+                Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
+           }
             foreach (var child in node.ChildNodes)
                 ScopeBody(child);
         }
@@ -329,7 +329,7 @@ namespace Zodiac {
             {
                 OperatorDefinition(node, funcIdt ,isVirtual);
             }
-            else if (funcIdt != "init")
+            else if (funcIdt != "_init")
             {
                 NormalFunctionDefinition(node, funcIdt, isVirtual);
             }
@@ -391,7 +391,7 @@ namespace Zodiac {
             }
             else if (paraNames.Count == 2)
             {
-                var operType = getOverloadUnaryOperator(funcIdt);
+                var operType = getOverlaodDualOperator(funcIdt);
                 func = ownerType.Operator(operType, funcRetType, getType(paraTypes[0]), paraNames[0], getType(paraTypes[1]), paraNames[1]);
             }
             else throw new Exception("Operator function get too many arguemnts");

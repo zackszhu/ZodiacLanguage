@@ -1,4 +1,4 @@
-@{
+
 type foo{
 
 	var i = long;
@@ -8,27 +8,48 @@ type foo{
         i = 100;
 	}
 }
-type bar <- foo{
 
+
+
+type bar
+{
+    var i = long;
     var j = long;
 
     func _init
     {
-        param xxoo = foo;
-        j = xxoo.i;
+        param x = foo;
+        i = x.i;
+        j = x.i;
     }
 
-    func barbar : long {
+
+    func barbar : long 
+    {
         return j;
     }
+
+    func barbar : long
+    {
+    	param x = long;
+    	return x;
+    }
+
+    oper + : long
+    {
+    	param x = bar;
+    	param y = bar;
+    	return x.i + y.i;
+    }
+
 }
+
 
 var f = foo();
 var b = bar(f);
-var i = 1;
-var j = b.barbar();
-}@
-IO.writeln(5);
+var i= 5;
+i = b + b;
+i = b.barbar(66);
+IO.writeln(i);
 
 
-@@ ^^ 没实现
