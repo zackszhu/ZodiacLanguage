@@ -20,21 +20,21 @@ namespace GrammarAnalysizer {
 
         public list(int start, int end) {
             _elements = new List<int>();
-            for (var i = start; i <= end; i++) {
+            for (var i = start; i < end; i++) {
                 _elements.Add(i);               
             }                                   
         }                                       
                                                 
         public list(int start, int end, int value) {     
             _offset = start;                                
-            for (var i = 0; i <= end - start; i++) {  
+            for (var i = 0; i < end - start; i++) {  
                 _elements.Add(value);
             }
         }
 
         public list(int start, int end, int startValue, int endValue) {
             _offset = start;
-            for (var i = 0; i <= end - start; i++) {
+            for (var i = 0; i < end - start; i++) {
                 _elements.Add(startValue + i > endValue ? 0 : startValue + i);
             }
         }

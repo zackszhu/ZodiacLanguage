@@ -311,15 +311,17 @@ namespace Zodiac {
 
         private void ForStatement(ParseTreeNode node) {
             if (node == null) return;
+            PushScope();
             var ownerFunc = funcStack.Peek();
             var enumerable = MemberAccess(node.ChildNodes[3]);
             if (enumerable.Type != "list") {
                 throw new Exception("Not enumerable");
             }
             var iterator = ownerFunc.ForEach(typeof (int), enumerable.Operand);
-            AddVarToVarTable(GetTokenText(node.ChildNodes[1]), new ZOperand(iterator, "int") );
+            AddVarToVarTable(GetTokenText(node.ChildNodes[1]), new ZOperand(iterator, "long") );
             ScopeBody(node.ChildNodes[4]);
             ownerFunc.End();
+            PopScope();
         }
 
         private void RetStatement(ParseTreeNode node)
@@ -374,7 +376,9 @@ namespace Zodiac {
                 {
                     var expressionNode = expIter.Current as ParseTreeNode;
                     var variableName = GetTokenText(idtIter.Current as ParseTreeNode);
-                    AddVarToVarTable(variableName, Expression(expressionNode));
+                    var tmp = Expression(expressionNode);
+                    var variable = ownerFunc.Local(typeTable[tmp.Type], tmp.Operand);
+                    AddVarToVarTable(variableName, new ZOperand(variable, tmp.Type));
                 }
             }
             else
@@ -973,7 +977,7 @@ namespace Zodiac {
                         mainAccess = MemberAccess(mainAccessNode,false);
                         member = segment.ChildNodes[0];
                         var index = Expression(member);
-                        return new ZOperand(mainAccess.Operand[tm, index.Operand], "char");
+                        return new ZOperand(mainAccess.Operand[tm, index.Operand], "long");
                     case BNF.dot:
                         mainAccess = MemberAccess(mainAccessNode,false);
                         member = node.ChildNodes[1].ChildNodes[1];
