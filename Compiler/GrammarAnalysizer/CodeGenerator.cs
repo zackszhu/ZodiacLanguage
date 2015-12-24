@@ -135,7 +135,7 @@ namespace Zodiac {
             if (GeneratedOK ) {
             ag.Save();
             AppDomain.CurrentDomain.ExecuteAssembly(name + ".exe");
-        }
+            }
 
         }
 
@@ -1031,6 +1031,10 @@ namespace Zodiac {
                 return node.Token.Text;
             }
             else if(node.ToString() == "required_type")
+            {
+                return GetTokenText(node.ChildNodes[0]);
+            }
+            else if (node.ToString() == "list_type")
             {
                 return GetTokenText(node.ChildNodes[0]);
             }

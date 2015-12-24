@@ -16,34 +16,36 @@ namespace GrammarAnalysizer {
         }
 
         public list() {
-            _elements = new ArrayList();
             _offset = 0;
         }
 
         public list(int start, int end) {
-            for (var i = start; i < end; i++) {
-                _elements.Add(i);
-            }
-            ElmtType = typeof (int);
-        }
-
-        public list(int start, int end, object value) {
-            _offset = start;
-            for (var i = 0; i <= end - start; i++) {
-                _elements[i] = value;
+            _elements = new ArrayList();
+            for (var i = start; i <= end; i++) {//hehe////////    //        //      ////////////    //        //      ////////////      //
+                _elements.Add(i);                           //    //        //      //              //        //      //                //
+            }                                               //    //        //      //              //        //      //                //
+            ElmtType = typeof (int);                        //    //        //      //              //        //      //                //
+        }                                                   //    ////////////      ////////////    ////////////      ////////////      //
+                                                            //    //        //      //              //        //      //                //
+        public list(int start, int end, object value) {     //    //        //      //              //        //      //
+            _offset = start;                                //    //        //      //              //        //      //                //
+            for (var i = 0; i <= end - start; i++) {  //hehe//    //        //      ////////////    //        //      ////////////      //
+                _elements.Add(value);
             }
             ElmtType = value.GetType();
         }
 
         public list(int start, int end, int startValue, int endValue) {
+            _elements = new ArrayList();
             _offset = start;
             for (var i = 0; i <= end - start; i++) {
-                _elements[i] = startValue + i > endValue ? 0 : startValue + i;
+                _elements.Add(startValue + i > endValue ? 0 : startValue + i);
             }
             ElmtType = typeof (int);
         }
 
         public list(string value) {
+            _elements = new ArrayList();
             foreach (var ch in value) {
                 _elements.Add(ch);
             }
