@@ -60,10 +60,11 @@ namespace GrammarAnalysizer {
 
         public override string ToString() {
             var str = "[";
-            foreach (var element in _elements) {
-                str += element.ToString();
+            for (var i = 0; i < _elements.Count - 1; i++) {
+                str += _elements[i].ToString();
                 str += ", ";
             }
+            str += _elements[_elements.Count - 1].ToString();
             str += "]";
             return str;
         }
