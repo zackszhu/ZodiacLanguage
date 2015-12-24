@@ -30,7 +30,7 @@ namespace Zodiac
             }
             //grammarAnalysizer.ShowParseTree();
             codeGenerator.Generate(grammarAnalysizer.ParseTree);
-            code = Console.ReadLine();
+            //code = Console.ReadLine();
             
             /*
             var i = 10;

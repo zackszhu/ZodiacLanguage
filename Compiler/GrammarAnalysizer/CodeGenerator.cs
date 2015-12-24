@@ -45,6 +45,9 @@ namespace Zodiac {
         private int columnNumber;
         private bool GeneratedOK;
 
+        private string selectFunc = "_Select_";
+        private int SelectFuncNumber = 0;
+
         public CodeGenerator() {
             varTable = new Stack<Dictionary<string, ZOperand>>();
             //typeMemberTable = new Dictionary<string, Dictionary<string, Type>>();
@@ -187,7 +190,7 @@ namespace Zodiac {
             
             if (node == null) return;
             BNF bnf = GetBNF(node);
-            try {
+            //try {
                 switch (bnf)
                 {
                     case BNF.simple_statement:
@@ -213,12 +216,12 @@ namespace Zodiac {
                             ScopeBody(child);
                         break;
                 }
-          }
+         /* }
            catch (Exception e)
             {
                 GeneratedOK = false;
                 Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
-           }
+           }*/
         }
 
         private void ContinueStatement() {
@@ -314,15 +317,17 @@ namespace Zodiac {
 
         private void ForStatement(ParseTreeNode node) {
             if (node == null) return;
+            PushScope();
             var ownerFunc = funcStack.Peek();
             var enumerable = MemberAccess(node.ChildNodes[3]);
             if (enumerable.Type != "list") {
                 throw new Exception("Not enumerable");
             }
             var iterator = ownerFunc.ForEach(typeof (int), enumerable.Operand);
-            AddVarToVarTable(GetTokenText(node.ChildNodes[1]), new ZOperand(iterator, "int") );
+            AddVarToVarTable(GetTokenText(node.ChildNodes[1]), new ZOperand(iterator, "long") );
             ScopeBody(node.ChildNodes[4]);
             ownerFunc.End();
+            PopScope();
         }
 
         private void RetStatement(ParseTreeNode node)
@@ -377,7 +382,9 @@ namespace Zodiac {
                 {
                     var expressionNode = expIter.Current as ParseTreeNode;
                     var variableName = GetTokenText(idtIter.Current as ParseTreeNode);
-                    AddVarToVarTable(variableName, Expression(expressionNode));
+                    var tmp = Expression(expressionNode);
+                    var variable = ownerFunc.Local(typeTable[tmp.Type], tmp.Operand);
+                    AddVarToVarTable(variableName, new ZOperand(variable, tmp.Type));
                 }
             }
             else
@@ -821,11 +828,18 @@ namespace Zodiac {
 
         private ZOperand Compute(ZOperand left, string oper, ZOperand right = null)
         {
+              //very important
             Operand resultValue = null;
             resultValue = right == null ? Compute(left.Operand, oper, null) : Compute(left.Operand, oper, right.Operand);
 
             if (resultValue == null) throw new Exception("invaild expression");
-            else return new ZOperand(resultValue, getTypeString(resultValue.GetReturnType(tm)));
+            else
+            {
+                var ownerfunc = funcStack.Peek();
+                var returnType = resultValue.GetReturnType(tm);
+                var tempLocal = ownerfunc.Local(returnType,resultValue);
+                return new ZOperand(tempLocal, getTypeString(resultValue.GetReturnType(tm)));
+            }
         }
 
         private ZOperand Expression(ParseTreeNode node)
@@ -876,6 +890,7 @@ namespace Zodiac {
             node = node.ChildNodes[0];
             if (node == null) throw new Exception("invalid list expression");
             BNF bnf = GetBNF(node);
+            
             switch (bnf)
             {
                 case BNF.list_normal_expression:
@@ -1004,7 +1019,7 @@ namespace Zodiac {
                         mainAccess = MemberAccess(mainAccessNode,false);
                         member = segment.ChildNodes[0];
                         var index = Expression(member);
-                        return new ZOperand(mainAccess.Operand[tm, index.Operand], "char");
+                        return new ZOperand(mainAccess.Operand[tm, index.Operand], "long");
                     case BNF.dot:
                         mainAccess = MemberAccess(mainAccessNode,false);
                         member = node.ChildNodes[1].ChildNodes[1];
@@ -1199,23 +1214,41 @@ namespace Zodiac {
         }
 
 
-        private ZOperand listSelectExpression(ParseTreeNode node)
+        private string CreateSelectFunction(ParseTreeNode node)
         {
-
-            var ownerFunc = funcStack.Peek();
+            var ownerType = typeStack.Peek();
+            var funcName = selectFunc + SelectFuncNumber;
+            SelectFuncNumber++;
+            CodeGen ownerFunc = ownerType.Public.Static.Method(typeof(list),funcName).Parameter(typeof(list),"arr");
+            funcStack.Push(ownerFunc);
             PushScope();
             string itemName = GetTokenText(node.ChildNodes[1]); //11
+          
             var result = ownerFunc.Local(exp.New(typeof(list)));
-           
-            var item = ownerFunc.ForEach(typeof(int), Expression(node.ChildNodes[3]).Operand);
-            AddVarToVarTable(itemName, new ZOperand(item, getTypeString(item.GetReturnType(tm)) ));
+
+            var item = ownerFunc.ForEach(typeof(int),ownerFunc.Arg("arr") );
+            AddVarToVarTable(itemName, new ZOperand(item, getTypeString(item.GetReturnType(tm))));
 
             ownerFunc.If(Expression(node.ChildNodes[5]).Operand);
             ownerFunc.Invoke(result, "Append", item);
             ownerFunc.End(); //end for if 
+
             ownerFunc.End(); //end for end
+
+            ownerFunc.Return(result);
             //var item = 
             PopScope();
+            funcStack.Pop();
+            return funcName;
+        }
+
+        private ZOperand listSelectExpression(ParseTreeNode node)
+        {
+            var ownerType = typeStack.Peek();
+            var ownerFunc = funcStack.Peek();
+            var funcName = CreateSelectFunction(node);
+            var from = Expression(node.ChildNodes[3]).Operand;
+            var result = ownerFunc.Local(typeof(list), st.Invoke(ownerType, funcName, from));
             return new ZOperand(result, "list");
         }
 
