@@ -823,6 +823,7 @@ namespace Zodiac {
                                     type = typeTable[mainAccess.Name];
                                     ret = ownerFunc.Local(exp.New(type));
                                 }
+
                                 // func();
                                 else if (isAccess)
                                 {
