@@ -47,9 +47,11 @@ type bar
 
 var f = foo();
 var b = bar(f);
+var j = long();
+ @@var l = list(0,5,1);
 var i= 5;
 i = b + b;
-i = b.barbar(66);
+@@i = b.barbar(66);
 IO.writeln(i);
 
 
