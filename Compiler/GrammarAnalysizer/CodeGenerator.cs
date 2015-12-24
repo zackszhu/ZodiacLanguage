@@ -121,7 +121,7 @@ namespace Zodiac {
             InitRequiredType();
             PushScope();
             var ioOperand = mainMethod.Local(exp.New(typeTable["IO"]));
-            AddVarToVarTable("io", new ZOperand(ioOperand, "IO"));
+            //AddVarToVarTable("io", new ZOperand(ioOperand, "IO"));
             AddParseNodeRec(parseTree.Root);
 
 
@@ -253,10 +253,31 @@ namespace Zodiac {
             foreach (var child in node.ChildNodes)
                 SimpleStatement(child);
         }
-        private void StructedStatement(ParseTreeNode node)
-        {
-            throw new NotImplementedException();
+        private void StructedStatement(ParseTreeNode node) {
+            if (node == null) return;
+            BNF bnf = GetBNF(node);
+            switch (bnf) {
+                case BNF.if_statement:
+                    IfStatement(node);
+                    break;
+                default:
+                    foreach (var childNode in node.ChildNodes) {
+                        StructedStatement(childNode);
+                    }
+                    break;
+            }
+            
+            //throw new NotImplementedException();
         }
+
+        private void IfStatement(ParseTreeNode node) {
+            if (node == null) return;
+            var ownerFunc = funcStack.Peek();
+            ownerFunc.If(Expression(node.ChildNodes[1]).Operand);
+            ScopeBody(node.ChildNodes[2]);
+            ownerFunc.End();
+        }
+
         private void RetStatement(ParseTreeNode node)
         {
             if (node == null) return;
@@ -1118,6 +1139,7 @@ namespace Zodiac {
             ret_statement,
             escape_statement,
             return_statement,
+            if_statement,
         }
     }
 }

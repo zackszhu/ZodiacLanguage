@@ -1,4 +1,4 @@
-
+@{
 type foo{
 
 	var i = long;
@@ -24,7 +24,7 @@ type bar
     }
 
 
-    func barbar : long 
+    func barbar : long
     {
         return j;
     }
@@ -44,8 +44,16 @@ type bar
 
 }
 
+}@
+var a = 1;
+if (a == 1) {
+    IO.writeln(100);
+}
+else if (a == -1) {
+    IO.writeln(a);
+}
 
-var f = foo();
+@{var f = foo();
 var b = bar(f);
 var j = long();
  @@var l = list(0,5,1);
@@ -53,5 +61,4 @@ var i= 5;
 i = b + b;
 @@i = b.barbar(66);
 IO.writeln(i);
-
-
+}@
