@@ -202,7 +202,15 @@ namespace Zodiac {
                     case BNF.ret_statement:
                         RetStatement(node);
                         return;
+                    case BNF.break_statement:
+                        BreakStatement();
+                        return;
+                    case BNF.continue_statement:
+                        ContinueStatement();
+                        return;
                     default:
+                        foreach (var child in node.ChildNodes)
+                            ScopeBody(child);
                         break;
                 }
           }
@@ -211,9 +219,16 @@ namespace Zodiac {
                 GeneratedOK = false;
                 Console.WriteLine("("+(lineNumber+1)+","+columnNumber+"):\t"+ e.Message);
            }
-            foreach (var child in node.ChildNodes)
-                ScopeBody(child);
         }
+
+        private void ContinueStatement() {
+            funcStack.Peek().Continue();
+        }
+
+        private void BreakStatement() {
+            funcStack.Peek().Break();
+        }
+
         private void FuncTypeDefinition(ParseTreeNode node)
         {
             if (node == null) return;
@@ -263,6 +278,12 @@ namespace Zodiac {
                 case BNF.if_statement:
                     IfStatement(node);
                     break;
+                case BNF.for_statement:
+                    ForStatement(node);
+                    break;
+                case BNF.while_statement:
+                    WhileStatement(node);
+                    break;
                 default:
                     foreach (var childNode in node.ChildNodes) {
                         StructedStatement(childNode);
@@ -273,11 +294,34 @@ namespace Zodiac {
             //throw new NotImplementedException();
         }
 
+        private void WhileStatement(ParseTreeNode node) {
+            if (node == null) return;
+            var ownerFunc = funcStack.Peek();
+            ownerFunc.While(Expression(node.ChildNodes[1]).Operand);
+            ScopeBody(node.ChildNodes[2]);
+            ownerFunc.End();
+        }
+
         private void IfStatement(ParseTreeNode node) {
             if (node == null) return;
             var ownerFunc = funcStack.Peek();
             ownerFunc.If(Expression(node.ChildNodes[1]).Operand);
             ScopeBody(node.ChildNodes[2]);
+            ownerFunc.Else();
+            ScopeBody(node.ChildNodes[3]);
+            ownerFunc.End();
+        }
+
+        private void ForStatement(ParseTreeNode node) {
+            if (node == null) return;
+            var ownerFunc = funcStack.Peek();
+            var enumerable = MemberAccess(node.ChildNodes[3]);
+            if (enumerable.Type != "list") {
+                throw new Exception("Not enumerable");
+            }
+            var iterator = ownerFunc.ForEach(typeof (int), enumerable.Operand);
+            AddVarToVarTable(GetTokenText(node.ChildNodes[1]), new ZOperand(iterator, "int") );
+            ScopeBody(node.ChildNodes[4]);
             ownerFunc.End();
         }
 
@@ -1209,7 +1253,11 @@ namespace Zodiac {
             list_expression,
             list_normal_expression,
             list_select_expression,
-            list_string_expression
+            list_string_expression,
+            for_statement,
+            break_statement,
+            continue_statement,
+            while_statement
         }
     }
 }
