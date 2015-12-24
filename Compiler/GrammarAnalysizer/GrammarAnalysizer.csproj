@@ -63,7 +63,7 @@
     <Compile Include="GrammarItemList.cs" />
     <Compile Include="GrammarLoader.cs" />
     <Compile Include="IO.cs" />
-    <Compile Include="MyList.cs" />
+    <Compile Include="list.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
