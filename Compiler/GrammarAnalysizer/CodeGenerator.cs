@@ -22,6 +22,7 @@ namespace Zodiac {
         public Operand Operand { get; }
         public string Type { get; }
         public string Name;
+
     }
 
 
@@ -96,6 +97,7 @@ namespace Zodiac {
 
             typeTable.Add("long", typeof(int));
             typeTable.Add("real", typeof(double));
+            typeTable.Add("string", typeof(string)); // only for internal use
             typeTable.Add("bool", typeof(bool));
             typeTable.Add("list", typeof(list));
             typeTable.Add("char", typeof(char));
@@ -121,6 +123,7 @@ namespace Zodiac {
             InitRequiredType();
             PushScope();
             var ioOperand = mainMethod.Local(exp.New(typeTable["IO"]));
+            //var o = mainMethod.Local(list < exp.New(typeTable["IO"]) > );
             //AddVarToVarTable("io", new ZOperand(ioOperand, "IO"));
             AddParseNodeRec(parseTree.Root);
 
@@ -570,6 +573,8 @@ namespace Zodiac {
                 return "real";
             if (type == typeof(bool))
                 return "bool";
+            if (type == typeof(string))
+                return "string";
             return type.Name;
         }
         private Type getType(string typeStr) => typeTable[typeStr];
@@ -795,7 +800,8 @@ namespace Zodiac {
 
                     }
 
-
+                case BNF.list_expression:
+                    return ListExpression(node);
                 case BNF.member_access:
                     return MemberAccess(node);
                 case BNF.unary_expression:
@@ -815,6 +821,27 @@ namespace Zodiac {
             }
 
         }
+
+        private ZOperand ListExpression(ParseTreeNode node)
+        {
+            CodeGen ownerFunc = funcStack.Peek();
+            node = node.ChildNodes[0];
+            if (node == null) throw new Exception("invalid list expression");
+            BNF bnf = GetBNF(node);
+            switch (bnf)
+            {
+                case BNF.list_normal_expression:
+                    return ListNormalExpression(node);
+                case BNF.list_select_expression:
+                    return listSelectExpression(node);
+                case BNF.list_string_expression:
+                    return ListStringExpression(node);
+                default:
+                    throw new Exception("invalid list expression");    
+            }      
+        }
+
+
 
         private ZOperand MemberAccess(ParseTreeNode node, bool isAccess = false)
         {
@@ -969,12 +996,13 @@ namespace Zodiac {
                     ParseTreeNode member;
                     switch (bnf)
                     {
+                        /*
                         case BNF.argument_list_par:
-                            //NOT SUPPORT
                             break;
                         case BNF.array_indexer:
                             //NOT SUPPORT
                             break;
+                        */
                         case BNF.dot:
                             mainAccess = MemberAccess(mainAccessNode);
                             member = node.ChildNodes[1].ChildNodes[1];
@@ -982,7 +1010,7 @@ namespace Zodiac {
                             mainAccess.Name = var;
                             return mainAccess;
                         default:
-                            throw new Exception("FunctionAccess");
+                            throw new Exception("FunctionAccess meet a invalid syntax");
                     }
                 }
             }
@@ -1103,6 +1131,40 @@ namespace Zodiac {
             throw new Exception("Var: " + varName + " can not be found!");
         }
 
+        private ZOperand ListNormalExpression(ParseTreeNode node)
+        {
+            var ownerFunc = funcStack.Peek();
+            var result =  ownerFunc.Local(typeof(list));
+            //expression_list add one by one
+            var expression_list = node.ChildNodes[0];
+            if (expression_list == null) throw new Exception("invalid list normal Expression");
+            foreach (var expression_node in expression_list.ChildNodes)
+            {
+                var temp = Expression(expression_node).Operand;
+
+                if (temp.GetReturnType(tm) != typeof(int))
+                    throw new Exception("type of list element must be long");
+                result.Invoke("Append",temp);
+            }
+            return new ZOperand(result,"list",null);
+        }
+
+        private ZOperand listSelectExpression(ParseTreeNode node)
+        {
+            
+        }
+
+        private ZOperand ListStringExpression(ParseTreeNode node)
+        {
+            var ownerFunc = funcStack.Peek();
+            string str = GetTokenText(node.ChildNodes[0]);
+            if (str == null) throw new Exception("invalid string expression");
+            var result = ownerFunc.Local(typeof(string),str);
+            return new ZOperand(result,"string");
+        }
+
+
+
 
         private enum BNF {
             program = 0,
@@ -1144,6 +1206,10 @@ namespace Zodiac {
             escape_statement,
             return_statement,
             if_statement,
+            list_expression,
+            list_normal_expression,
+            list_select_expression,
+            list_string_expression
         }
     }
 }
