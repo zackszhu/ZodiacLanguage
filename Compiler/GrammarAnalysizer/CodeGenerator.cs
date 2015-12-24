@@ -316,7 +316,7 @@ namespace Zodiac {
             var enumerable = MemberAccess(node.ChildNodes[3]);
             if (enumerable.Type != "list") {
                 throw new Exception("Not enumerable");
-            }
+            }S
             var iterator = ownerFunc.ForEach(typeof (int), enumerable.Operand);
             AddVarToVarTable(GetTokenText(node.ChildNodes[1]), new ZOperand(iterator, "long") );
             ScopeBody(node.ChildNodes[4]);
