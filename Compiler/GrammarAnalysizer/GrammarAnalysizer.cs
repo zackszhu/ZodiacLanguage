@@ -12,11 +12,8 @@ namespace Zodiac {
         private Grammar grammar;
         private LanguageData language;
         private Parser parser;
-        private ParseTree parseTree;
 
-        public ParseTree ParseTree {
-            get { return parseTree; }
-        }
+        public ParseTree ParseTree { get; private set; }
 
         private GrammarLoader grammarLoader = new GrammarLoader();
         
@@ -27,12 +24,13 @@ namespace Zodiac {
         }
 
         private void LoadGrammar() {
-            var dlgSelectAssembly = new System.Windows.Forms.OpenFileDialog();
-            dlgSelectAssembly.DefaultExt = "dll";
-            dlgSelectAssembly.Filter = "DLL files|*.dll";
-            dlgSelectAssembly.Title = "Select Grammar Assembly ";
-            if (dlgSelectAssembly.ShowDialog() != DialogResult.OK) return;
-            string location = dlgSelectAssembly.FileName;
+            //var dlgSelectAssembly = new System.Windows.Forms.OpenFileDialog();
+            //dlgSelectAssembly.DefaultExt = "dll";
+            //dlgSelectAssembly.Filter = "DLL files|*.dll";
+            //dlgSelectAssembly.Title = "Select Grammar Assembly ";
+            //if (dlgSelectAssembly.ShowDialog() != DialogResult.OK) return;
+            //string location = dlgSelectAssembly.FileName;
+            string location = "../Compiler/Zodiac.dll";
             if (string.IsNullOrEmpty(location)) return;
             grammarLoader.SelectedGrammar = SelectGrammars(location);
             if (grammarLoader.SelectedGrammar == null) return;
@@ -40,17 +38,15 @@ namespace Zodiac {
         }
 
         private void CreateParser() {
-            parseTree = null;
+            ParseTree = null;
             language = new LanguageData(grammar);
             parser = new Parser(language);
         }
 
         private GrammarItem SelectGrammars(string assemblyPath) {
             var fromGrammars = LoadGrammars(assemblyPath);
-            if (fromGrammars == null)
-                return null;
             //fill the listbox and show the form
-            GrammarItem result = fromGrammars[0];
+            GrammarItem result = fromGrammars?[0];
             return result;
         }
 
@@ -79,7 +75,7 @@ namespace Zodiac {
 
         public void ParseSample(string code) {
             if (parser == null || !parser.Language.CanParse()) return;
-            parseTree = null;
+            ParseTree = null;
             GC.Collect(); //to avoid disruption of perf times with occasional collections
             parser.Context.TracingEnabled = false;//parsetrace not needed for us
             try {
@@ -90,13 +86,13 @@ namespace Zodiac {
                 throw;
             }
             finally {
-                parseTree = parser.Context.CurrentParseTree;
+                ParseTree = parser.Context.CurrentParseTree;
             }
         }
 
         public void ShowParseTree() {
-            if (parseTree == null) return;
-            AddParseNodeRec(0, parseTree.Root);
+            if (ParseTree == null) return;
+            AddParseNodeRec(0, ParseTree.Root);
         }
 
         private void AddParseNodeRec(int depth, ParseTreeNode node) {

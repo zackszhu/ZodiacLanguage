@@ -129,7 +129,7 @@ namespace Zodiac {
             //var o = mainMethod.Local(list < exp.New(typeTable["IO"]) > );
             //AddVarToVarTable("io", new ZOperand(ioOperand, "IO"));
             AddParseNodeRec(parseTree.Root);
-
+            
             //var i = GetVar("i").Operand;
             //var j = GetVar("j").Operand;
             //mainMethod.Invoke(typeof(IO), "writeln", i);
@@ -837,10 +837,10 @@ namespace Zodiac {
             if (resultValue == null) throw new Exception("invaild expression");
             else
             {
-                var ownerfunc = funcStack.Peek();
-                var returnType = resultValue.GetReturnType(tm);
-                var tempLocal = ownerfunc.Local(returnType,resultValue);
-                return new ZOperand(tempLocal, getTypeString(resultValue.GetReturnType(tm)));
+                //var ownerfunc = funcStack.Peek();
+                //var returnType = resultValue.GetReturnType(tm);
+                //var tempLocal = ownerfunc.Local(returnType,resultValue);
+                return new ZOperand(resultValue, getTypeString(resultValue.GetReturnType(tm)));
             }
         }
 

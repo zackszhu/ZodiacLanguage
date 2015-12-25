@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{421E8DA8-F4AB-4939-8371-BAE76E69DC3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrammarAnalysizer", "GrammarAnalysizer\GrammarAnalysizer.csproj", "{66B9F3B5-EE38-4525-81A8-5E4988CEC302}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZodiacCompiler", "GrammarAnalysizer\ZodiacCompiler.csproj", "{66B9F3B5-EE38-4525-81A8-5E4988CEC302}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
