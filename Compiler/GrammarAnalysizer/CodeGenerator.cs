@@ -1284,7 +1284,7 @@ namespace Zodiac {
         private ZOperand ListStringExpression(ParseTreeNode node)
         {
             var ownerFunc = funcStack.Peek();
-            string str = GetTokenText(node.ChildNodes[0]);
+            string str = node.ChildNodes[0].Token.Value.ToString();
             if (str == null) throw new Exception("invalid string expression");
             var result = ownerFunc.Local(typeof(string),str);
             return new ZOperand(result,"string");
