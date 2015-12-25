@@ -13,10 +13,10 @@ namespace Zodiac
             //string code = "var i,console = long(1*1+1), IO; console.write(i+1);";
             //string code = " var i,j = 1+1+1+1, 1+2+3; ";
             // string code = " var i = long(1); ";
-            string code = System.IO.File.ReadAllText("../../test/inheir.zs");
-
+            //string code = System.IO.File.ReadAllText("../../../test/while_statement.zs");
+            string code = System.IO.File.ReadAllText(args[0]);
             //string code = "static func getAB : long { param a = long; param b = long; param c = long; return b;} var i = getAB(1,2,3);";
-           // string code = "var i = 111; var j = i.ToString()[2];";
+            // string code = "var i = 111; var j = i.ToString()[2];";
             grammarAnalysizer.ParseSample(code);
 
             if (grammarAnalysizer.ParseTree.Root == null)
@@ -30,16 +30,7 @@ namespace Zodiac
             }
             //grammarAnalysizer.ShowParseTree();
             codeGenerator.Generate(grammarAnalysizer.ParseTree);
-            //code = Console.ReadLine();
             
-            /*
-            var i = 10;
-            var j = 10;
-            Console.WriteLine("i:"+(int)&i+"j:"+(int)&j);
-            i = 100000000;
-            j = i;
-            Console.WriteLine("i:" + (int)&i + "j:" + (int)&j);
-            */
         }
     }
     
