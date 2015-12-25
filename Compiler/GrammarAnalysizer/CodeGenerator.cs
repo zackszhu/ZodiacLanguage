@@ -631,16 +631,25 @@ namespace Zodiac {
             return type.Name;
         }
         private Type getType(string typeStr) => typeTable[typeStr];
+
+
+
         private void AssignmentStatement(ParseTreeNode node)
         {
             CodeGen ownerFunc = funcStack.Peek();
             //for single assignment
-            ZOperand leftValue = null, rightValue = null;
-            if(node.ChildNodes[0].ChildNodes.Count == 1)
-                leftValue = MemberAccess(node.ChildNodes[0].ChildNodes[0]);
-            if(node.ChildNodes[2].ChildNodes.Count == 1)
-                rightValue = Expression(node.ChildNodes[2].ChildNodes[0]);
-            ownerFunc.Assign(leftValue.Operand, rightValue.Operand);
+            int count1 = node.ChildNodes[0].ChildNodes.Count;
+            int count2 = node.ChildNodes[2].ChildNodes.Count;
+            if (count1 != count2)
+                throw new Exception("assignment count is not equal");
+            for (int i=0; i< count1; i++)
+            {
+                ZOperand leftValue = null, rightValue = null;
+                leftValue = MemberAccess(node.ChildNodes[0].ChildNodes[i]);
+                rightValue = Expression(node.ChildNodes[2].ChildNodes[i]);
+                ownerFunc.Assign(leftValue.Operand, rightValue.Operand);
+            }
+
         }
         private void TypeDefinition(ParseTreeNode node) {
             // type init
@@ -863,7 +872,15 @@ namespace Zodiac {
                             : new ZOperand(ownerFunc.Local(typeof(double), double.Parse(GetTokenText(node))), "real");
 
                     }
-
+                case BNF.charLiteral:
+                    {
+                        char ch = node.Token.Value.ToString()[0];
+                        return new ZOperand(ownerFunc.Local(typeof(char), ch ),"char");
+                    }
+                case BNF.True:
+                    return new ZOperand(ownerFunc.Local(typeof(bool), true), "bool");
+                case BNF.False:
+                    return new ZOperand(ownerFunc.Local(typeof(bool), false), "bool");
                 case BNF.list_expression:
                     return ListExpression(node);
                 case BNF.member_access:
@@ -1341,7 +1358,10 @@ namespace Zodiac {
             for_statement,
             break_statement,
             continue_statement,
-            while_statement
+            while_statement,
+            charLiteral,
+            True,
+            False
         }
     }
 }
