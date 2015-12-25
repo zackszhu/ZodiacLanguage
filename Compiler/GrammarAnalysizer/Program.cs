@@ -9,8 +9,8 @@ namespace Zodiac
         {
             GrammarAnalysizer grammarAnalysizer = new GrammarAnalysizer();
             CodeGenerator codeGenerator = new CodeGenerator();
-            string code = System.IO.File.ReadAllText("../../../test/basic_type.zs");
-            //string code = System.IO.File.ReadAllText(args[0]);
+            //string code = System.IO.File.ReadAllText("../../../test/basic_type.zs");
+            string code = System.IO.File.ReadAllText(args[0]);
             grammarAnalysizer.ParseSample(code);
             if (grammarAnalysizer.ParseTree.Root == null)
             {
