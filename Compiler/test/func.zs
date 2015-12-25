@@ -6,11 +6,12 @@ func foo : long {
     return k + 1;
 }
 
-func foo : long {
+func foo : real {
     param i = long;
+    param k = real;
 
     IO.writeln(i);
-    return i + 100;
+    return k + 1.414;
 }
 
-IO.writeln(foo(2));
+IO.writeln(foo(2, 1.1));

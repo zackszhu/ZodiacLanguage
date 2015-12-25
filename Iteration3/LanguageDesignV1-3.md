@@ -89,7 +89,7 @@ True || False @@ 或运算，得True
 变量定义时使用`var`作为关键字，在定义时可以声明变量类型，或者直接赋值立即数，以`;`结束语句。
 
 ```
-var number1 = 42; var number2 = long(42); @@ number = 42 
+var number1 = 42; var number2 = long(42); @@ number = 42
 var float_number = real(3.14); @@ float_number = 3.14
 var ch = char('a'); @@ ch = 'a'
 @same as var ch = char("a");
@@ -97,7 +97,7 @@ var flag = True; @@ flag = True(or False)
 
 var lst = list(1, 3); @@ lst = [1, 2]
 var lst_2 = list(2,4,1); @@ 列表的下标为2到3，长度为2，并且填充为1。
-var lst_3 = list(2,4,1, 4)；
+var lst_3 = list(2,4,1, 4);
 @{
     列表的下标为2到3，长度为2，并且填充值为1, 2。
     如果填充列表小于列表长度，其余项填充0。
@@ -108,11 +108,11 @@ var lst_3 = list(2,4,1, 4)；
 如果想使用类型的默认值，可以这样写：
 
 ```
-var number = long; @@ number = 0
-var float_number = real; @@ float_number = 0.0
-var ch = char; @@ ch = '\0'
-var flag = bool; @@ flag = False
-var lst = list; @@ lst = []
+var number = long(); @@ number = 0
+var float_number = real(); @@ float_number = 0.0
+var ch = char(); @@ ch = '\0'
+var flag = bool(); @@ flag = False
+var lst = list(); @@ lst = []
 ```
 
 ### 函数定义
@@ -130,15 +130,12 @@ var lst = list; @@ lst = []
 举例如下：
 
 ```
-func Foo : long{
-    @@ 参数设定块
-    param flag = bool;
-    param i, j := long, long; @@ 传值
-    param k := long(1); @@ 传值
+func Foo : long {
+    param i = long;
+    param k = long;
 
-    @@ 函数执行块
-    do_something();
-    return ret_1;
+    IO.writeln(i);
+    return k + 1;
 }
 ```
 
@@ -158,18 +155,27 @@ do_something(foo, bar);
 如果函数的形参类型不同，则可以进行重载，举例如下：
 
 ```
-func foo {
+func foo : long {
     param i = long;
-    return i;
+    param k = long;
+
+    IO.writeln(i);
+    return k + 1;
 }
 
-func foo {
-    param i = bool;
-    return !i;
+func foo : real {
+    param i = long;
+    param k = real;
+
+    IO.writeln(i);
+    return k + 1.414;
 }
+
+IO.writeln(foo(2, 1.1));
+
 ```
 
-在调用时如果采用`long`类型调用，则调用第一个`foo`函数，如果采用`bool`类型调用，则调用第二个`foo`函数。
+在调用时如果采用第二个参数`long`类型调用，则调用第一个`foo`函数，如果采用`real`类型调用，则调用第二个`foo`函数。
 
 
 #### 操作符重载
@@ -186,14 +192,12 @@ oper + : long {
 
 ### 变量赋值
 
-我们可以采用`=`关键字将等号右边的对象赋值给等号左边的对象，同时Z语言也支持多重赋值，将等号右边的对象一次赋值到等号左边的对象中。
+我们可以采用`=`关键字将等号右边的对象赋值给等号左边的对象，同时Zodiac语言也支持多重赋值，将等号右边的对象一次赋值到等号左边的对象中。
 
 举例如下：
 
 ```
-a = b; @@ 把b的对象赋值给a
-a, b = c, d; @@ 把c的对象赋值给a，把d的对象赋值给b
-a, b = b, a; @@ 交换a和b的对象
+var a, b = 3, 4;
 ```
 
 
@@ -312,7 +316,7 @@ while (True) { @@ 此处将不断循环
 在生成列表时，为了简化代码，增强列表的功能，Z语言提供了一种内联的查询语句。采用了`select`, `from`, `where`语句来实现，举例如下：
 
 ```
-var even_numbers = 
+var even_numbers =
     from item in list(1, 100)
     where item % 2 == 0
     select item
@@ -347,7 +351,7 @@ real => long: 1.5 => long = 1
 
 在继承关系中，也支持继承类型之间的转换，如果想使用多态特性，需要显式地使用转换功能使得父类子类函数相互调用，举例如下：
 
-```type Base 
+```type Base
 {
     var x = long;
     func _init

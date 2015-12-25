@@ -6,6 +6,10 @@ IO.writeln(number);
 var float_number = 3.14;
 IO.writeln(float_number);
 
+var a, b = 3, 4;
+IO.writeln(a);
+IO.writeln(b);
+
 var ch = "a";
 IO.writeln(ch);
 
