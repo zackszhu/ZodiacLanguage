@@ -1,3 +1,22 @@
+@@ default
+var l = long();
+var c = char();
+var b = bool();
+var rr = real();
+IO.writeln(l);
+IO.writeln(c);
+IO.writeln(b);
+IO.writeln(rr);
+if (b)
+{
+    IO.writeln("b is true");
+}
+else
+{
+    IO.writeln("b is false");
+}
+
+
 var s = "sss";
 IO.writeln(s);
 var ch = 'a';
@@ -14,4 +33,3 @@ else
 {
     IO.writeln("bo is false");
 }
-
